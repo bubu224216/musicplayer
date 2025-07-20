@@ -6,6 +6,7 @@
 #include <QMediaPlaylist>
 #include<QPushButton>
 #include<vector>
+#include <QFileDialog>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -50,6 +51,9 @@ public slots:
     void handleNextSlot();
     //处理上一首
     void handlePrevSlot();
+    // 添加音乐文件的槽函数
+    void handleAddMusicSlot();
+
 private:
     //音乐播放器
     QMediaPlayer* m_player;
@@ -65,5 +69,11 @@ private:
 
     //音乐文件夹
     QString musicDir;
+
+    //完整的文件名称
+    QMap<QString, QString> m_fullFileNameMap;//歌曲名称和后缀名对应
+
+    // 标记是否手动切歌
+    bool m_isManualSwitch;
 };
 #endif // MAINWINDOW_H
