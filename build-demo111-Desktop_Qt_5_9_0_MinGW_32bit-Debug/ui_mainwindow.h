@@ -15,9 +15,12 @@
 #include <QtWidgets/QButtonGroup>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QHeaderView>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QListWidget>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QPushButton>
+#include <QtWidgets/QSlider>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QToolBar>
 #include <QtWidgets/QWidget>
@@ -35,6 +38,10 @@ public:
     QPushButton *nextBtn;
     QPushButton *listBtn;
     QPushButton *modeBtn;
+    QListWidget *musicList;
+    QSlider *progressSlider;
+    QLabel *totalTimeLabel;
+    QLabel *currentTimeLabel;
     QToolBar *mainToolBar;
     QMenuBar *menuBar;
     QStatusBar *statusBar;
@@ -48,7 +55,7 @@ public:
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
         widget = new QWidget(centralWidget);
         widget->setObjectName(QStringLiteral("widget"));
-        widget->setGeometry(QRect(10, 80, 491, 231));
+        widget->setGeometry(QRect(0, 220, 491, 191));
         horizontalLayout = new QHBoxLayout(widget);
         horizontalLayout->setSpacing(6);
         horizontalLayout->setContentsMargins(11, 11, 11, 11);
@@ -78,6 +85,19 @@ public:
 
         horizontalLayout->addWidget(modeBtn);
 
+        musicList = new QListWidget(centralWidget);
+        musicList->setObjectName(QStringLiteral("musicList"));
+        musicList->setGeometry(QRect(280, -10, 256, 311));
+        progressSlider = new QSlider(centralWidget);
+        progressSlider->setObjectName(QStringLiteral("progressSlider"));
+        progressSlider->setGeometry(QRect(60, 80, 160, 16));
+        progressSlider->setOrientation(Qt::Horizontal);
+        totalTimeLabel = new QLabel(centralWidget);
+        totalTimeLabel->setObjectName(QStringLiteral("totalTimeLabel"));
+        totalTimeLabel->setGeometry(QRect(80, 120, 54, 12));
+        currentTimeLabel = new QLabel(centralWidget);
+        currentTimeLabel->setObjectName(QStringLiteral("currentTimeLabel"));
+        currentTimeLabel->setGeometry(QRect(80, 140, 54, 12));
         MainWindow->setCentralWidget(centralWidget);
         mainToolBar = new QToolBar(MainWindow);
         mainToolBar->setObjectName(QStringLiteral("mainToolBar"));
@@ -103,6 +123,8 @@ public:
         nextBtn->setText(QString());
         listBtn->setText(QString());
         modeBtn->setText(QString());
+        totalTimeLabel->setText(QApplication::translate("MainWindow", "TextLabel", Q_NULLPTR));
+        currentTimeLabel->setText(QApplication::translate("MainWindow", "TextLabel", Q_NULLPTR));
     } // retranslateUi
 
 };

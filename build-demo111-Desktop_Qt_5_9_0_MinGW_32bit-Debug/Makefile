@@ -220,8 +220,10 @@ Makefile: ../demo111/demo111.pro ../../qtcpp/5.9/mingw53_32/mkspecs/win32-g++/qm
 		../../qtcpp/5.9/mingw53_32/mkspecs/features/lex.prf \
 		../demo111/demo111.pro \
 		../../qtcpp/5.9/mingw53_32/lib/qtmaind.prl \
+		../../qtcpp/5.9/mingw53_32/lib/Qt5Multimedia.prl \
 		../../qtcpp/5.9/mingw53_32/lib/Qt5Widgets.prl \
 		../../qtcpp/5.9/mingw53_32/lib/Qt5Gui.prl \
+		../../qtcpp/5.9/mingw53_32/lib/Qt5Network.prl \
 		../../qtcpp/5.9/mingw53_32/lib/Qt5Core.prl
 	$(QMAKE) -o Makefile ..\demo111\demo111.pro -spec win32-g++ "CONFIG+=debug" "CONFIG+=qml_debug"
 ../../qtcpp/5.9/mingw53_32/mkspecs/features/spec_pre.prf:
@@ -382,8 +384,10 @@ Makefile: ../demo111/demo111.pro ../../qtcpp/5.9/mingw53_32/mkspecs/win32-g++/qm
 ../../qtcpp/5.9/mingw53_32/mkspecs/features/lex.prf:
 ../demo111/demo111.pro:
 ../../qtcpp/5.9/mingw53_32/lib/qtmaind.prl:
+../../qtcpp/5.9/mingw53_32/lib/Qt5Multimedia.prl:
 ../../qtcpp/5.9/mingw53_32/lib/Qt5Widgets.prl:
 ../../qtcpp/5.9/mingw53_32/lib/Qt5Gui.prl:
+../../qtcpp/5.9/mingw53_32/lib/Qt5Network.prl:
 ../../qtcpp/5.9/mingw53_32/lib/Qt5Core.prl:
 qmake: FORCE
 	@$(QMAKE) -o Makefile ..\demo111\demo111.pro -spec win32-g++ "CONFIG+=debug" "CONFIG+=qml_debug"

@@ -8,7 +8,7 @@ QT       += core gui
 
 CONFIG+=resources_big
 
-
+QT += multimedia
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
