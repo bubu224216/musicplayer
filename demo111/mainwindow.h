@@ -39,6 +39,8 @@ private:
     void shufflePlayList();
     //播放音乐
     void startPlayMusic();
+    //设置文件背景
+    void setBackGround(const QString & fliename);
 public slots:
     //处理暂停播放
     void handlePlaySlot();

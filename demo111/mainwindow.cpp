@@ -109,7 +109,7 @@ MainWindow::MainWindow(QWidget *parent) :
     splitter->addWidget(playerWidget);
     splitter->setSizes(QList<int>() << 200 << 400);
     mainLayout->addWidget(splitter);
-
+    setBackGround("C:\\Users\\13235\\Pictures\\MIUI03.jpg");
     initButtons();
 
     // 音乐文件夹路径（确保末尾有分隔符）
@@ -322,6 +322,16 @@ void MainWindow::loadAppointMusicDir(const QString& filepath){
 
 void MainWindow::resizeEvent(QResizeEvent *event) {
     QMainWindow::resizeEvent(event);
+}
+
+void MainWindow::setBackGround(const QString & filename){
+    QPixmap pixmap(filename);
+    QSize windowSize = this->size();
+    QPixmap scalePixmap = pixmap.scaled(windowSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    QPalette palette = this->palette();
+    palette.setBrush(QPalette::Background,QBrush(scalePixmap));
+    this->setPalette(palette);
+
 }
 
 MainWindow::~MainWindow() {
