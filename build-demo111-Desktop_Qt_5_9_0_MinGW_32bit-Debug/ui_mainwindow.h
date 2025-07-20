@@ -33,8 +33,8 @@ public:
     QPushButton *preBtn;
     QPushButton *playBtn;
     QPushButton *nextBtn;
-    QPushButton *modeBtn;
     QPushButton *listBtn;
+    QPushButton *modeBtn;
     QToolBar *mainToolBar;
     QMenuBar *menuBar;
     QStatusBar *statusBar;
@@ -48,12 +48,11 @@ public:
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
         widget = new QWidget(centralWidget);
         widget->setObjectName(QStringLiteral("widget"));
-        widget->setGeometry(QRect(20, 259, 426, 22));
+        widget->setGeometry(QRect(10, 80, 491, 231));
         horizontalLayout = new QHBoxLayout(widget);
         horizontalLayout->setSpacing(6);
         horizontalLayout->setContentsMargins(11, 11, 11, 11);
         horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
-        horizontalLayout->setContentsMargins(0, 0, 0, 0);
         preBtn = new QPushButton(widget);
         preBtn->setObjectName(QStringLiteral("preBtn"));
 
@@ -69,15 +68,15 @@ public:
 
         horizontalLayout->addWidget(nextBtn);
 
-        modeBtn = new QPushButton(widget);
-        modeBtn->setObjectName(QStringLiteral("modeBtn"));
-
-        horizontalLayout->addWidget(modeBtn);
-
         listBtn = new QPushButton(widget);
         listBtn->setObjectName(QStringLiteral("listBtn"));
 
         horizontalLayout->addWidget(listBtn);
+
+        modeBtn = new QPushButton(widget);
+        modeBtn->setObjectName(QStringLiteral("modeBtn"));
+
+        horizontalLayout->addWidget(modeBtn);
 
         MainWindow->setCentralWidget(centralWidget);
         mainToolBar = new QToolBar(MainWindow);
@@ -102,8 +101,8 @@ public:
         preBtn->setText(QString());
         playBtn->setText(QString());
         nextBtn->setText(QString());
-        modeBtn->setText(QString());
         listBtn->setText(QString());
+        modeBtn->setText(QString());
     } // retranslateUi
 
 };

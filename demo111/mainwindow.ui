@@ -14,13 +14,13 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="widget" native="true">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>259</y>
-      <width>426</width>
-      <height>22</height>
+      <x>10</x>
+      <y>80</y>
+      <width>491</width>
+      <height>231</height>
      </rect>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout">
@@ -46,14 +46,14 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="modeBtn">
+      <widget class="QPushButton" name="listBtn">
        <property name="text">
         <string/>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="listBtn">
+      <widget class="QPushButton" name="modeBtn">
        <property name="text">
         <string/>
        </property>

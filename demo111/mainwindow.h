@@ -2,6 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include<QString>
+#include<QPushButton>
 
 namespace Ui {
 class MainWindow;
@@ -17,6 +19,9 @@ public:
 
 private:
     Ui::MainWindow *ui;
+private:
+    void setButtonStyle(QPushButton* button,const QString&fiename);
+    void initButtons();
 };
 
 #endif // MAINWINDOW_H
