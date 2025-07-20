@@ -6,6 +6,10 @@
 
 QT       += core gui
 
+CONFIG+=resources_big
+
+
+
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = demo111
@@ -32,3 +36,6 @@ HEADERS += \
 
 FORMS += \
         mainwindow.ui
+
+RESOURCES += \
+    res.qrc
