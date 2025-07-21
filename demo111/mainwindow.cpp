@@ -487,12 +487,8 @@ void MainWindow::resizeEvent(QResizeEvent *event) {
 
 //设置背景的函数
 void MainWindow::setBackGround(const QString & filename){
-    QPixmap pixmap(filename);
-    QSize windowSize = this->size();
-    QPixmap scalePixmap = pixmap.scaled(windowSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-    QPalette palette = this->palette();
-    palette.setBrush(QPalette::Background,QBrush(scalePixmap));
-    this->setPalette(palette);
+    setStyleSheet(QString("MainWindow { border-image: url(%1) 0 0 0 0 stretch stretch; }")
+                      .arg(filename));
 
 }
 
