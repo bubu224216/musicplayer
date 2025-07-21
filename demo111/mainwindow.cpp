@@ -17,6 +17,7 @@
 #include <QDebug>
 #include <time.h>
 #include <vector>
+#include <QListWidget>
 
 
 //构造函数以及ui外观的设计
@@ -43,25 +44,43 @@ MainWindow::MainWindow(QWidget *parent) :
     splitter->setHandleWidth(1);
     splitter->setChildrenCollapsible(false);
 
-    QWidget *listWidget = new QWidget(this);
-    QVBoxLayout *listLayout = new QVBoxLayout(listWidget);
-    listLayout->setContentsMargins(0, 0, 0, 0);
-    listLayout->setSpacing(0);
-    ui->musicList->setStyleSheet("QListWidget {"
-                                 "    background-color: #f5f5f5;"
-                                 "    border: 1px solid #ddd;"
-                                 "}"
-                                 "QListWidget::item {"
-                                 "    padding: 5px 10px;"
-                                 "    border-bottom: 1px solid #eee;"
-                                 "    font-size: 14px;"
-                                 "}"
-                                 "QListWidget::item:selected {"
-                                 "    background-color: #cce5ff;"
-                                 "    color: #004085;"
-                                 "}");
-    listLayout->addWidget(ui->musicList);
+    // 新增：创建列表容器，包含列表和折叠按钮
+    m_listContainer = new QWidget(this);
+    QVBoxLayout *listContainerLayout = new QVBoxLayout(m_listContainer);
+    listContainerLayout->setContentsMargins(0, 0, 0, 0);
+    listContainerLayout->setSpacing(0);
+    // 新增：折叠按钮
+    QPushButton* toggleListBtn = new QPushButton(this);
+    toggleListBtn->setIcon(QIcon(":/res/collapse.jpg"));
+    toggleListBtn->setFixedSize(24, 24);
+    toggleListBtn->setStyleSheet("QPushButton {"
+                                    "    background-color: #f0f0f0;"
+                                    "    border: 1px solid #ddd;"
+                                    "    border-radius: 3px;"
+                                    "}"
+                                    "QPushButton:hover {"
+                                    "    background-color: #e0e0e0;"
+                                    "}");
 
+    connect(toggleListBtn, &QPushButton::clicked, this, &MainWindow::handleListToggleSlot);
+    // 设置音乐列表样式
+    ui->musicList->setStyleSheet("QListWidget {"
+                                     "    background-color: #f5f5f5;"
+                                     "    border: 1px solid #ddd;"
+                                     "}"
+                                     "QListWidget::item {"
+                                     "    padding: 5px 10px;"
+                                     "    border-bottom: 1px solid #eee;"
+                                     "    font-size: 14px;"
+                                     "}"
+                                     "QListWidget::item:selected {"
+                                     "    background-color: #cce5ff;"
+                                     "    color: #004085;"
+                                     "}");
+    // 构建列表容器布局
+    listContainerLayout->addWidget(ui->musicList);
+    listContainerLayout->addWidget(toggleListBtn, 0, Qt::AlignRight);
+    // 创建播放器区域
     QWidget *playerWidget = new QWidget(this);
     QVBoxLayout *playerLayout = new QVBoxLayout(playerWidget);
     playerLayout->setContentsMargins(10, 10, 10, 10);
@@ -122,10 +141,35 @@ MainWindow::MainWindow(QWidget *parent) :
     buttonLayout->addStretch();
 
 
+    // 新增：创建折叠后显示的信息栏
+        m_collapsedInfoBar = new QWidget(this);
+        m_collapsedInfoBar->setVisible(false); // 初始隐藏
+        QHBoxLayout* infoBarLayout = new QHBoxLayout(m_collapsedInfoBar);
+        infoBarLayout->setContentsMargins(10, 5, 10, 5);
+
+        QLabel* nowPlayingLabel = new QLabel("正在播放:", this);
+        QLabel* currentSongLabel = new QLabel("无", this);
+        currentSongLabel->setObjectName("currentSongLabel");
+        currentSongLabel->setStyleSheet("font-weight: bold;");
+
+        QPushButton* expandBtn = new QPushButton(this);
+        expandBtn->setIcon(QIcon(":/res/expand.jpg"));
+        expandBtn->setFixedSize(24, 24);
+        expandBtn->setStyleSheet("QPushButton {"
+                                 "    background-color: transparent;"
+                                 "    border: none;"
+                                 "}");
+        connect(expandBtn, &QPushButton::clicked, this, &MainWindow::handleListToggleSlot);
+
+        infoBarLayout->addWidget(nowPlayingLabel);
+        infoBarLayout->addWidget(currentSongLabel, 1); // 占满剩余空间
+        infoBarLayout->addWidget(expandBtn);
+
+
     playerLayout->addStretch();
     playerLayout->addLayout(progressLayout);
     playerLayout->addWidget(buttonContainer);
-    splitter->addWidget(listWidget);
+    splitter->addWidget(m_listContainer);
     splitter->addWidget(playerWidget);
     splitter->setSizes(QList<int>() << 200 << 400);
     mainLayout->addWidget(splitter);
@@ -209,7 +253,6 @@ void MainWindow::initButtons() {
 
 
     // 列表项点击播放
-    // 在initButtons()函数中
     connect(ui->musicList, &QListWidget::itemClicked, this, &MainWindow::handleMusicListItemClicked);
 }
 
@@ -453,6 +496,11 @@ void MainWindow::startPlayMusic() {
     m_progressSlider->setValue(0);
     m_currentTimeLabel->setText("00:00");
     m_totalTimeLabel->setText("00:00");
+
+    // 更新折叠信息栏（如果已折叠）
+        if (m_collapsedInfoBar->isVisible()) {
+            m_collapsedInfoBar->findChild<QLabel*>("currentSongLabel")->setText(musicName);
+        }
 }
 
 //加载音乐文件的函数
@@ -533,6 +581,32 @@ QString MainWindow::formatTime(qint64 timeMilliSeconds)
     qint64 minutes = seconds / 60;               // 提取分钟
     seconds = seconds % 60;                      // 剩余秒数
     return QString("%1:%2").arg(minutes, 2, 10, QChar('0')).arg(seconds, 2, 10, QChar('0'));
+}
+
+void MainWindow::handleListToggleSlot()
+{
+    static bool isListCollapsed = false;
+
+    if (isListCollapsed) {
+        // 展开列表
+        ui->musicList->setVisible(true);
+        m_collapsedInfoBar->setVisible(false);
+        qobject_cast<QPushButton*>(sender())->setIcon(QIcon(":/res/collapse.jpg"));
+    } else {
+        // 折叠列表
+        ui->musicList->setVisible(false);
+        m_collapsedInfoBar->setVisible(true);
+
+        // 更新当前播放歌曲信息
+        if (ui->musicList->currentItem()) {
+            QString currentSong = ui->musicList->currentItem()->text();
+            m_collapsedInfoBar->findChild<QLabel*>("currentSongLabel")->setText(currentSong);
+        }
+
+        qobject_cast<QPushButton*>(sender())->setIcon(QIcon(":/res/expand.jpg"));
+    }
+
+    isListCollapsed = !isListCollapsed;
 }
 
 

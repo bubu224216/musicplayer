@@ -73,6 +73,8 @@ public slots:
     void handleProgressSliderReleased();
     //列表点击
     void handleMusicListItemClicked(QListWidgetItem *item);
+    //列表折叠与展开函数
+    void handleListToggleSlot();
 
 private:
     //音乐播放器
@@ -101,5 +103,9 @@ private:
     QLabel* m_currentTimeLabel;     // 当前时间标签指针
     QLabel* m_totalTimeLabel;       // 总时长标签指针
     bool m_sliderPressed;           // 标记进度条是否正在被拖动
+
+    QWidget* m_listContainer;     // 列表容器（包含列表和折叠按钮）
+    QWidget* m_collapsedInfoBar;  // 折叠后显示的信息栏
+
 };
 #endif // MAINWINDOW_H
