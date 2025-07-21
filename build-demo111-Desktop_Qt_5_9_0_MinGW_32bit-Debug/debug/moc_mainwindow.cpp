@@ -39,27 +39,27 @@ QT_MOC_LITERAL(4, 42, 14), // "handleNextSlot"
 QT_MOC_LITERAL(5, 57, 14), // "handlePrevSlot"
 QT_MOC_LITERAL(6, 72, 18), // "handleAddMusicSlot"
 QT_MOC_LITERAL(7, 91, 26), // "handleChangeBackgroundSlot"
-QT_MOC_LITERAL(8, 118, 14), // "updateProgress"
-QT_MOC_LITERAL(9, 133, 8), // "position"
-QT_MOC_LITERAL(10, 142, 14), // "updateDuration"
-QT_MOC_LITERAL(11, 157, 8), // "duration"
-QT_MOC_LITERAL(12, 166, 11), // "setPosition"
-QT_MOC_LITERAL(13, 178, 27), // "handleProgressSliderPressed"
-QT_MOC_LITERAL(14, 206, 28), // "handleProgressSliderReleased"
-QT_MOC_LITERAL(15, 235, 26), // "handleMusicListItemClicked"
-QT_MOC_LITERAL(16, 262, 16), // "QListWidgetItem*"
-QT_MOC_LITERAL(17, 279, 4), // "item"
-QT_MOC_LITERAL(18, 284, 20) // "handleToggleListSlot"
+QT_MOC_LITERAL(8, 118, 20), // "handleToggleListSlot"
+QT_MOC_LITERAL(9, 139, 26), // "handleMusicListItemClicked"
+QT_MOC_LITERAL(10, 166, 16), // "QListWidgetItem*"
+QT_MOC_LITERAL(11, 183, 4), // "item"
+QT_MOC_LITERAL(12, 188, 14), // "updateProgress"
+QT_MOC_LITERAL(13, 203, 8), // "position"
+QT_MOC_LITERAL(14, 212, 14), // "updateDuration"
+QT_MOC_LITERAL(15, 227, 8), // "duration"
+QT_MOC_LITERAL(16, 236, 11), // "setPosition"
+QT_MOC_LITERAL(17, 248, 27), // "handleProgressSliderPressed"
+QT_MOC_LITERAL(18, 276, 28) // "handleProgressSliderReleased"
 
     },
     "MainWindow\0handlePlaySlot\0\0handleModeSlot\0"
     "handleNextSlot\0handlePrevSlot\0"
     "handleAddMusicSlot\0handleChangeBackgroundSlot\0"
-    "updateProgress\0position\0updateDuration\0"
-    "duration\0setPosition\0handleProgressSliderPressed\0"
-    "handleProgressSliderReleased\0"
-    "handleMusicListItemClicked\0QListWidgetItem*\0"
-    "item\0handleToggleListSlot"
+    "handleToggleListSlot\0handleMusicListItemClicked\0"
+    "QListWidgetItem*\0item\0updateProgress\0"
+    "position\0updateDuration\0duration\0"
+    "setPosition\0handleProgressSliderPressed\0"
+    "handleProgressSliderReleased"
 };
 #undef QT_MOC_LITERAL
 
@@ -77,19 +77,19 @@ static const uint qt_meta_data_MainWindow[] = {
        0,       // signalCount
 
  // slots: name, argc, parameters, tag, flags
-       1,    0,   79,    2, 0x0a /* Public */,
-       3,    0,   80,    2, 0x0a /* Public */,
-       4,    0,   81,    2, 0x0a /* Public */,
-       5,    0,   82,    2, 0x0a /* Public */,
-       6,    0,   83,    2, 0x0a /* Public */,
-       7,    0,   84,    2, 0x0a /* Public */,
-       8,    1,   85,    2, 0x0a /* Public */,
-      10,    1,   88,    2, 0x0a /* Public */,
-      12,    1,   91,    2, 0x0a /* Public */,
-      13,    0,   94,    2, 0x0a /* Public */,
-      14,    0,   95,    2, 0x0a /* Public */,
-      15,    1,   96,    2, 0x0a /* Public */,
-      18,    0,   99,    2, 0x0a /* Public */,
+       1,    0,   79,    2, 0x08 /* Private */,
+       3,    0,   80,    2, 0x08 /* Private */,
+       4,    0,   81,    2, 0x08 /* Private */,
+       5,    0,   82,    2, 0x08 /* Private */,
+       6,    0,   83,    2, 0x08 /* Private */,
+       7,    0,   84,    2, 0x08 /* Private */,
+       8,    0,   85,    2, 0x08 /* Private */,
+       9,    1,   86,    2, 0x08 /* Private */,
+      12,    1,   89,    2, 0x08 /* Private */,
+      14,    1,   92,    2, 0x08 /* Private */,
+      16,    1,   95,    2, 0x08 /* Private */,
+      17,    0,   98,    2, 0x08 /* Private */,
+      18,    0,   99,    2, 0x08 /* Private */,
 
  // slots: parameters
     QMetaType::Void,
@@ -98,12 +98,12 @@ static const uint qt_meta_data_MainWindow[] = {
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
-    QMetaType::Void, QMetaType::LongLong,    9,
-    QMetaType::Void, QMetaType::LongLong,   11,
-    QMetaType::Void, QMetaType::Int,    9,
     QMetaType::Void,
+    QMetaType::Void, 0x80000000 | 10,   11,
+    QMetaType::Void, QMetaType::LongLong,   13,
+    QMetaType::Void, QMetaType::LongLong,   15,
+    QMetaType::Void, QMetaType::Int,   13,
     QMetaType::Void,
-    QMetaType::Void, 0x80000000 | 16,   17,
     QMetaType::Void,
 
        0        // eod
@@ -121,13 +121,13 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         case 3: _t->handlePrevSlot(); break;
         case 4: _t->handleAddMusicSlot(); break;
         case 5: _t->handleChangeBackgroundSlot(); break;
-        case 6: _t->updateProgress((*reinterpret_cast< qint64(*)>(_a[1]))); break;
-        case 7: _t->updateDuration((*reinterpret_cast< qint64(*)>(_a[1]))); break;
-        case 8: _t->setPosition((*reinterpret_cast< int(*)>(_a[1]))); break;
-        case 9: _t->handleProgressSliderPressed(); break;
-        case 10: _t->handleProgressSliderReleased(); break;
-        case 11: _t->handleMusicListItemClicked((*reinterpret_cast< QListWidgetItem*(*)>(_a[1]))); break;
-        case 12: _t->handleToggleListSlot(); break;
+        case 6: _t->handleToggleListSlot(); break;
+        case 7: _t->handleMusicListItemClicked((*reinterpret_cast< QListWidgetItem*(*)>(_a[1]))); break;
+        case 8: _t->updateProgress((*reinterpret_cast< qint64(*)>(_a[1]))); break;
+        case 9: _t->updateDuration((*reinterpret_cast< qint64(*)>(_a[1]))); break;
+        case 10: _t->setPosition((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 11: _t->handleProgressSliderPressed(); break;
+        case 12: _t->handleProgressSliderReleased(); break;
         default: ;
         }
     }
