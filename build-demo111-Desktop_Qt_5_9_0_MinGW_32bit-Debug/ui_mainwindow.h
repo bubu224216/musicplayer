@@ -20,6 +20,7 @@
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QSlider>
+#include <QtWidgets/QToolButton>
 #include <QtWidgets/QWidget>
 
 QT_BEGIN_NAMESPACE
@@ -33,13 +34,14 @@ public:
     QPushButton *preBtn;
     QPushButton *playBtn;
     QPushButton *nextBtn;
-    QPushButton *listBtn;
+    QPushButton *addBtn;
     QPushButton *modeBtn;
     QListWidget *musicList;
     QSlider *progressSlider;
     QLabel *totalTimeLabel;
     QLabel *currentTimeLabel;
     QPushButton *themeBtn;
+    QToolButton *soundBtn;
 
     void setupUi(QMainWindow *MainWindow)
     {
@@ -70,10 +72,10 @@ public:
 
         horizontalLayout->addWidget(nextBtn);
 
-        listBtn = new QPushButton(widget);
-        listBtn->setObjectName(QStringLiteral("listBtn"));
+        addBtn = new QPushButton(widget);
+        addBtn->setObjectName(QStringLiteral("addBtn"));
 
-        horizontalLayout->addWidget(listBtn);
+        horizontalLayout->addWidget(addBtn);
 
         modeBtn = new QPushButton(widget);
         modeBtn->setObjectName(QStringLiteral("modeBtn"));
@@ -96,6 +98,9 @@ public:
         themeBtn = new QPushButton(centralWidget);
         themeBtn->setObjectName(QStringLiteral("themeBtn"));
         themeBtn->setGeometry(QRect(150, 160, 80, 15));
+        soundBtn = new QToolButton(centralWidget);
+        soundBtn->setObjectName(QStringLiteral("soundBtn"));
+        soundBtn->setGeometry(QRect(220, 180, 32, 16));
         MainWindow->setCentralWidget(centralWidget);
 
         retranslateUi(MainWindow);
@@ -109,11 +114,12 @@ public:
         preBtn->setText(QString());
         playBtn->setText(QString());
         nextBtn->setText(QString());
-        listBtn->setText(QString());
+        addBtn->setText(QString());
         modeBtn->setText(QString());
         totalTimeLabel->setText(QApplication::translate("MainWindow", "00:00", Q_NULLPTR));
         currentTimeLabel->setText(QApplication::translate("MainWindow", "00:00", Q_NULLPTR));
         themeBtn->setText(QString());
+        soundBtn->setText(QApplication::translate("MainWindow", "...", Q_NULLPTR));
     } // retranslateUi
 
 };

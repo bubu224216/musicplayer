@@ -33,7 +33,7 @@ public:
 
 private:
     Ui::MainWindow *ui;
-    void setButtonStyle(QPushButton* button, const QString& filename);
+    void setButtonStyle(QAbstractButton* button, const QString& filename);
     //初始化按钮
     void initButtons();
     //加载指定的文件夹

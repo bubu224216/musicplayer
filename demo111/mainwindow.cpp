@@ -116,10 +116,19 @@ MainWindow::MainWindow(QWidget *parent) :
     buttonLayout->addStretch();
     buttonLayout->addWidget(ui->modeBtn);
     buttonLayout->addStretch();
-    buttonLayout->addWidget(ui->listBtn);
+    buttonLayout->addWidget(ui->soundBtn);
     buttonLayout->addStretch();
-    buttonLayout->addWidget(ui->themeBtn);
-    buttonLayout->addStretch();
+
+
+
+    QWidget *buttonContainer2 = new QWidget(this);
+    QVBoxLayout *buttonLayout2 = new QVBoxLayout(buttonContainer2);
+    buttonLayout2->addWidget(ui->addBtn);
+    buttonLayout2->addStretch();
+    buttonLayout2->addWidget(ui->themeBtn);
+    buttonLayout2->addStretch();
+    playerLayout->addWidget(buttonContainer2);
+
 
 
     playerLayout->addStretch();
@@ -156,11 +165,11 @@ MainWindow::MainWindow(QWidget *parent) :
 }
 
 //按钮的外观设计代码
-void MainWindow::setButtonStyle(QPushButton* button, const QString& filename) {
+void MainWindow::setButtonStyle(QAbstractButton* button, const QString& filename) {
     button->setFixedSize(80, 80);
     button->setIconSize(QSize(80, 80));
     button->setIcon(QIcon(filename));
-    button->setStyleSheet("QPushButton {"
+    button->setStyleSheet("QAbstractButton {"
                           "    background-color: transparent;"
                           "    border: none;"
                           "    padding: 5px;"
@@ -197,14 +206,15 @@ void MainWindow::initButtons() {
     setButtonStyle(ui->playBtn, ":/res/play.png");
     setButtonStyle(ui->nextBtn, ":/res/next.png");
     setButtonStyle(ui->modeBtn, ":/res/list.png");
-    setButtonStyle(ui->listBtn, ":/res/pure.png");
+    setButtonStyle(ui->addBtn, ":/res/pure.png");
     setButtonStyle(ui->themeBtn, ":/res/theme.png");
+    setButtonStyle(ui->soundBtn, ":/res/sound.png");
 
     connect(ui->playBtn, &QPushButton::clicked, this, &MainWindow::handlePlaySlot);
     connect(ui->modeBtn, &QPushButton::clicked, this, &MainWindow::handleModeSlot);
     connect(ui->nextBtn,&QPushButton::clicked,this,&MainWindow::handleNextSlot);
     connect(ui->preBtn,&QPushButton::clicked,this,&MainWindow::handlePrevSlot);
-    connect(ui->listBtn, &QPushButton::clicked, this, &MainWindow::handleAddMusicSlot);
+    connect(ui->addBtn, &QPushButton::clicked, this, &MainWindow::handleAddMusicSlot);
     connect(ui->themeBtn, &QPushButton::clicked, this, &MainWindow::handleChangeBackgroundSlot);
 
 
