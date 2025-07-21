@@ -25,7 +25,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_mode(LIST_MODE),
     ui(new Ui::MainWindow),
     m_shuffleIndex(-1),
-    m_isManualSwitch(false) // 初始化为 false
+    m_isManualSwitch(false) // 初始化为 false  防止自动播放和手动播放之间的冲突
 {
     ui->setupUi(this);
     setWindowTitle("音乐播放器");
@@ -67,12 +67,9 @@ MainWindow::MainWindow(QWidget *parent) :
     playerLayout->setContentsMargins(10, 10, 10, 10);
     playerLayout->setSpacing(10);
 
-    // 进度条占位（不实现功能）
+    // 进度条
     QHBoxLayout *progressLayout = new QHBoxLayout();
-    QLabel *currentTimeLabel = new QLabel("00:00", this);
-    QSlider *progressSlider = new QSlider(Qt::Horizontal, this);
-    QLabel *totalTimeLabel = new QLabel("00:00", this);
-    progressSlider->setStyleSheet("QSlider::groove:horizontal {"
+    ui->progressSlider->setStyleSheet("QSlider::groove:horizontal {"
                                   "    border: 1px solid #999999;"
                                   "    height: 8px;"
                                   "    background: #CCCCCC;"
@@ -85,10 +82,27 @@ MainWindow::MainWindow(QWidget *parent) :
                                   "    margin: -2px 0;"
                                   "    border-radius: 4px;"
                                   "}");
-    progressLayout->addWidget(currentTimeLabel);
-    progressLayout->addWidget(progressSlider);
-    progressLayout->addWidget(totalTimeLabel);
+    progressLayout->addWidget(ui->currentTimeLabel);
+    progressLayout->addWidget(ui->progressSlider);
+    progressLayout->addWidget(ui->totalTimeLabel);
 
+    // 在构造函数中保存UI设计器中控件的指针
+    m_progressSlider = ui->progressSlider;
+    m_currentTimeLabel = ui->currentTimeLabel;
+    m_totalTimeLabel = ui->totalTimeLabel;
+
+    // 连接播放器信号到进度更新函数
+    connect(m_player, &QMediaPlayer::positionChanged, this, &MainWindow::updateProgress);
+    connect(m_player, &QMediaPlayer::durationChanged, this, &MainWindow::updateDuration);
+
+    // 连接进度条信号到位置设置函数
+    connect(m_progressSlider, &QSlider::sliderMoved, this, &MainWindow::setPosition);
+    connect(m_progressSlider, &QSlider::sliderPressed, this, &MainWindow::handleProgressSliderPressed);
+    connect(m_progressSlider, &QSlider::sliderReleased, this, &MainWindow::handleProgressSliderReleased);
+
+
+
+    //放在widget当中用于调整布局
     QWidget *buttonContainer = new QWidget(this);
     QHBoxLayout *buttonLayout = new QHBoxLayout(buttonContainer);
     buttonLayout->setSpacing(20);
@@ -105,8 +119,8 @@ MainWindow::MainWindow(QWidget *parent) :
     buttonLayout->addWidget(ui->listBtn);
     buttonLayout->addStretch();
 
-    playerLayout->addLayout(progressLayout);
     playerLayout->addStretch();
+    playerLayout->addLayout(progressLayout);
     playerLayout->addWidget(buttonContainer);
     splitter->addWidget(listWidget);
     splitter->addWidget(playerWidget);
@@ -368,6 +382,7 @@ void MainWindow::handleAddMusicSlot() {
         }
     }
 }
+
 //开始播放音乐函数
 void MainWindow::startPlayMusic() {
     if (!ui->musicList->currentItem()) return;
@@ -384,6 +399,12 @@ void MainWindow::startPlayMusic() {
     m_player->setMedia(QUrl::fromLocalFile(Abs));
     m_player->play();
     ui->playBtn->setIcon(QIcon(":/res/pause.png"));
+
+
+    // 重置进度条和时间显示
+    m_progressSlider->setValue(0);
+    m_currentTimeLabel->setText("00:00");
+    m_totalTimeLabel->setText("00:00");
 }
 
 //加载音乐文件的函数
@@ -426,6 +447,50 @@ void MainWindow::setBackGround(const QString & filename){
     this->setPalette(palette);
 
 }
+
+
+void MainWindow::updateProgress(qint64 position)
+{
+    // 仅当用户未主动拖动进度条时更新UI
+    if (!m_sliderPressed && m_player->duration() > 0) {
+        m_progressSlider->setValue(position);            // 更新进度条位置
+        m_currentTimeLabel->setText(formatTime(position));  // 更新当前时间
+    }
+}
+
+void MainWindow::updateDuration(qint64 duration)
+{
+    m_progressSlider->setRange(0, duration);       // 设置进度条范围
+    m_totalTimeLabel->setText(formatTime(duration));  // 更新总时长
+}
+
+void MainWindow::handleProgressSliderPressed()
+{
+    m_sliderPressed = true;  // 标记用户正在拖动进度条
+}
+
+void MainWindow::handleProgressSliderReleased()
+{
+    m_sliderPressed = false;  // 标记拖动结束
+    setPosition(m_progressSlider->value());  // 跳转到释放位置
+}
+
+void MainWindow::setPosition(int position)
+{
+    if (m_sliderPressed) {  // 仅在拖动释放后跳转，避免拖动过程中频繁跳转
+        m_player->setPosition(position);
+        m_currentTimeLabel->setText(formatTime(position));
+    }
+}
+
+QString MainWindow::formatTime(qint64 timeMilliSeconds)
+{
+    qint64 seconds = timeMilliSeconds / 1000;    // 转换为秒
+    qint64 minutes = seconds / 60;               // 提取分钟
+    seconds = seconds % 60;                      // 剩余秒数
+    return QString("%1:%2").arg(minutes, 2, 10, QChar('0')).arg(seconds, 2, 10, QChar('0'));
+}
+
 
 MainWindow::~MainWindow() {
     delete ui;

@@ -7,6 +7,8 @@
 #include<QPushButton>
 #include<vector>
 #include <QFileDialog>
+#include<QSlider>
+#include<QLabel>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -42,6 +44,8 @@ private:
     void startPlayMusic();
     //设置文件背景
     void setBackGround(const QString & fliename);
+    //格式化时间函数
+     QString formatTime(qint64 timeMilliSeconds);
 public slots:
     //处理暂停播放
     void handlePlaySlot();
@@ -53,6 +57,17 @@ public slots:
     void handlePrevSlot();
     // 添加音乐文件的槽函数
     void handleAddMusicSlot();
+
+    //当前时间的槽函数
+    void updateProgress(qint64 position);
+    //总的时长的槽函数
+    void updateDuration(qint64 duration);
+    //设置播放位置的槽函数
+    void setPosition(int position);
+    //进度条按压
+    void handleProgressSliderPressed();
+    //进度条释放
+    void handleProgressSliderReleased();
 
 private:
     //音乐播放器
@@ -75,5 +90,11 @@ private:
 
     // 标记是否手动切歌
     bool m_isManualSwitch;
+
+
+    QSlider* m_progressSlider;      // 进度条指针
+    QLabel* m_currentTimeLabel;     // 当前时间标签指针
+    QLabel* m_totalTimeLabel;       // 总时长标签指针
+    bool m_sliderPressed;           // 标记进度条是否正在被拖动
 };
 #endif // MAINWINDOW_H
