@@ -33,6 +33,7 @@ public:
 
 private:
     Ui::MainWindow *ui;
+
     void setButtonStyle(QAbstractButton* button, const QString& filename);
     //初始化按钮
     void initButtons();
@@ -47,6 +48,8 @@ private:
     void setBackGround(const QString & fliename);
     //格式化时间函数
      QString formatTime(qint64 timeMilliSeconds);
+     QWidget* m_listWidget; // 添加到 MainWindow.h 中的 private 区域
+
 public slots:
     //处理暂停播放
     void handlePlaySlot();
@@ -73,10 +76,14 @@ public slots:
     void handleProgressSliderReleased();
     //列表点击
     void handleMusicListItemClicked(QListWidgetItem *item);
+    //歌曲列表收放
+    void handleToggleListSlot();
+
 
 private:
     //音乐播放器
     QMediaPlayer* m_player;
+
 
     //当前的播放模式
     PLAYMODE m_mode;

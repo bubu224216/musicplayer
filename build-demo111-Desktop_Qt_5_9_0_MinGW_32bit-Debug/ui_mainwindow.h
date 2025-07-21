@@ -42,6 +42,8 @@ public:
     QLabel *currentTimeLabel;
     QPushButton *themeBtn;
     QToolButton *soundBtn;
+    QPushButton *togglelistBtn;
+    QWidget *widget_2;
 
     void setupUi(QMainWindow *MainWindow)
     {
@@ -101,6 +103,12 @@ public:
         soundBtn = new QToolButton(centralWidget);
         soundBtn->setObjectName(QStringLiteral("soundBtn"));
         soundBtn->setGeometry(QRect(220, 180, 32, 16));
+        togglelistBtn = new QPushButton(centralWidget);
+        togglelistBtn->setObjectName(QStringLiteral("togglelistBtn"));
+        togglelistBtn->setGeometry(QRect(90, 30, 80, 15));
+        widget_2 = new QWidget(centralWidget);
+        widget_2->setObjectName(QStringLiteral("widget_2"));
+        widget_2->setGeometry(QRect(160, 20, 120, 80));
         MainWindow->setCentralWidget(centralWidget);
 
         retranslateUi(MainWindow);
@@ -120,6 +128,7 @@ public:
         currentTimeLabel->setText(QApplication::translate("MainWindow", "00:00", Q_NULLPTR));
         themeBtn->setText(QString());
         soundBtn->setText(QApplication::translate("MainWindow", "...", Q_NULLPTR));
+        togglelistBtn->setText(QString());
     } // retranslateUi
 
 };
