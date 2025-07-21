@@ -3,31 +3,24 @@
 
 #include <QMainWindow>
 #include <QMediaPlayer>
-#include <QPushButton>
-#include <vector>
+#include <QMediaPlaylist>
+#include<QPushButton>
+#include<vector>
 #include <QFileDialog>
-#include <QSlider>
-#include <QLabel>
-#include <QListWidgetItem>
-#include <QMap>
-#include <QPropertyAnimation>
-#include<QVBoxLayout>
+#include<QSlider>
+#include<QLabel>
+#include<QListWidgetItem>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
-// 播放模式枚举
+//创建播放模式
 enum PLAYMODE{
     LIST_MODE,
     RANDOM_MODE,
     SINGLE_MODE
-};
 
-// 歌词结构体
-struct Lyric {
-    qint64 time;       // 歌词时间点(毫秒)
-    QString content;   // 歌词内容
 };
 
 class MainWindow : public QMainWindow
@@ -41,64 +34,79 @@ public:
 private:
     Ui::MainWindow *ui;
 
-    // 界面初始化相关函数
     void setButtonStyle(QAbstractButton* button, const QString& filename);
+    //初始化按钮
     void initButtons();
-    void loadAppointMusicDir(const QString& filename);
+    //加载指定的文件夹
+    void loadAppointMusicDir(const QString&filename);
     void resizeEvent(QResizeEvent *event);
-    void setBackGround(const QString &filename);
-
-    // 歌词相关函数
-    bool parseLyricFile(const QString& filePath);
-    void loadLyricForCurrentSong();
-    void updateLyricDisplay();
-    QString formatTime(qint64 timeMilliSeconds);
-
-    // 播放控制相关函数
+    //洗牌算法
     void shufflePlayList();
+    //播放音乐
     void startPlayMusic();
+    //设置文件背景
+    void setBackGround(const QString & fliename);
+    //格式化时间函数
+     QString formatTime(qint64 timeMilliSeconds);
+     QWidget* m_listWidget; // 添加到 MainWindow.h 中的 private 区域
 
-    // 成员变量
-    QMediaPlayer* m_player;
-    PLAYMODE m_mode;
-    std::vector<int> m_shuffleList;
-    int m_shuffleIndex;
-    QString musicDir;
-    QMap<QString, QString> m_fullFileNameMap;
-    bool m_isManualSwitch;
-    QWidget* m_listWidget;
-
-    // 进度条相关
-    QSlider* m_progressSlider;
-    QLabel* m_currentTimeLabel;
-    QLabel* m_totalTimeLabel;
-    bool m_sliderPressed;
-
-    // 歌词相关
-    QList<Lyric> m_lyrics;
-    QWidget* m_lyricWidget;
-    QVBoxLayout* m_lyricLayout;
-    QList<QLabel*> m_lyricLabels;
-    int m_currentLyricIndex;
-    QString m_currentLyricFile;
-
-private slots:
-    // 播放控制槽函数
+public slots:
+    //处理暂停播放
     void handlePlaySlot();
+    //处理播放模式
     void handleModeSlot();
+    //处理下一首
     void handleNextSlot();
+    //处理上一首
     void handlePrevSlot();
+    // 添加音乐文件的槽函数
     void handleAddMusicSlot();
+    //添加改变背景的槽函数
     void handleChangeBackgroundSlot();
-    void handleToggleListSlot();
-    void handleMusicListItemClicked(QListWidgetItem *item);
 
-    // 进度与歌词同步槽函数
+    //当前时间的槽函数
     void updateProgress(qint64 position);
+    //总的时长的槽函数
     void updateDuration(qint64 duration);
+    //设置播放位置的槽函数
     void setPosition(int position);
+    //进度条按压
     void handleProgressSliderPressed();
+    //进度条释放
     void handleProgressSliderReleased();
-};
+    //列表点击
+    void handleMusicListItemClicked(QListWidgetItem *item);
+    //歌曲列表收放
+    void handleToggleListSlot();
 
+//ujtutgu
+private:
+    //音乐播放器
+    QMediaPlayer* m_player;
+
+
+    //当前的播放模式
+    PLAYMODE m_mode;
+
+    //数组
+    std::vector<int> m_shuffleList;
+
+    //索引
+    int m_shuffleIndex;
+
+    //音乐文件夹
+    QString musicDir;
+
+    //完整的文件名称
+    QMap<QString, QString> m_fullFileNameMap;//歌曲名称和后缀名对应
+
+    // 标记是否手动切歌
+    bool m_isManualSwitch;
+
+
+    QSlider* m_progressSlider;      // 进度条指针
+    QLabel* m_currentTimeLabel;     // 当前时间标签指针
+    QLabel* m_totalTimeLabel;       // 总时长标签指针
+    bool m_sliderPressed;           // 标记进度条是否正在被拖动
+};
 #endif // MAINWINDOW_H
