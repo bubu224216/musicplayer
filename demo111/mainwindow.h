@@ -57,6 +57,8 @@ public slots:
     void handlePrevSlot();
     // 添加音乐文件的槽函数
     void handleAddMusicSlot();
+    //添加改变背景的槽函数
+    void handleChangeBackgroundSlot();
 
     //当前时间的槽函数
     void updateProgress(qint64 position);

@@ -118,6 +118,9 @@ MainWindow::MainWindow(QWidget *parent) :
     buttonLayout->addStretch();
     buttonLayout->addWidget(ui->listBtn);
     buttonLayout->addStretch();
+    buttonLayout->addWidget(ui->themeBtn);
+    buttonLayout->addStretch();
+
 
     playerLayout->addStretch();
     playerLayout->addLayout(progressLayout);
@@ -126,7 +129,7 @@ MainWindow::MainWindow(QWidget *parent) :
     splitter->addWidget(playerWidget);
     splitter->setSizes(QList<int>() << 200 << 400);
     mainLayout->addWidget(splitter);
-    setBackGround("C:\\Users\\13235\\Pictures\\MIUI03.jpg");
+    setBackGround(":/res/bcakground.jpg");
     initButtons();
 
     //后面添加了图形界面添加歌曲
@@ -195,12 +198,14 @@ void MainWindow::initButtons() {
     setButtonStyle(ui->nextBtn, ":/res/next.png");
     setButtonStyle(ui->modeBtn, ":/res/list.png");
     setButtonStyle(ui->listBtn, ":/res/pure.png");
+    setButtonStyle(ui->themeBtn, ":/res/theme.png");
 
     connect(ui->playBtn, &QPushButton::clicked, this, &MainWindow::handlePlaySlot);
     connect(ui->modeBtn, &QPushButton::clicked, this, &MainWindow::handleModeSlot);
     connect(ui->nextBtn,&QPushButton::clicked,this,&MainWindow::handleNextSlot);
     connect(ui->preBtn,&QPushButton::clicked,this,&MainWindow::handlePrevSlot);
     connect(ui->listBtn, &QPushButton::clicked, this, &MainWindow::handleAddMusicSlot);
+    connect(ui->themeBtn, &QPushButton::clicked, this, &MainWindow::handleChangeBackgroundSlot);
 
 
     // 列表项点击播放
@@ -381,6 +386,32 @@ void MainWindow::handleAddMusicSlot() {
             startPlayMusic();
         }
     }
+}
+void MainWindow::handleChangeBackgroundSlot(){
+    // 打开文件对话框，限制只显示图片文件
+        QString filePath = QFileDialog::getOpenFileName(
+            this,                        // 父窗口指针
+            "选择背景图片",               // 对话框标题
+            QDir::homePath(),            // 默认打开路径（用户主目录）
+            "图片文件 (*.png *.jpg *.jpeg *.bmp *.gif);;所有文件 (*)"  // 文件过滤器
+        );
+
+        // 如果用户取消了选择，filePath 会是空字符串
+        if (filePath.isEmpty()) {
+            qDebug() << "用户取消了背景图片选择";
+            return;
+        }
+
+        // 获取文件信息（可选，用于验证文件有效性）
+        QFileInfo fileInfo(filePath);
+        if (!fileInfo.exists() || !fileInfo.isFile()) {
+            QMessageBox::warning(this, "错误", "选择的文件不存在或无效");
+            return;
+        }
+
+        // 可选：立即应用背景图片
+        setBackGround(filePath);
+
 }
 
 //开始播放音乐函数

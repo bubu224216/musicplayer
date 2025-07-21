@@ -42,6 +42,7 @@ public:
     QSlider *progressSlider;
     QLabel *totalTimeLabel;
     QLabel *currentTimeLabel;
+    QPushButton *themeBtn;
     QToolBar *mainToolBar;
     QMenuBar *menuBar;
     QStatusBar *statusBar;
@@ -98,13 +99,16 @@ public:
         currentTimeLabel = new QLabel(centralWidget);
         currentTimeLabel->setObjectName(QStringLiteral("currentTimeLabel"));
         currentTimeLabel->setGeometry(QRect(80, 140, 54, 12));
+        themeBtn = new QPushButton(centralWidget);
+        themeBtn->setObjectName(QStringLiteral("themeBtn"));
+        themeBtn->setGeometry(QRect(150, 160, 80, 15));
         MainWindow->setCentralWidget(centralWidget);
         mainToolBar = new QToolBar(MainWindow);
         mainToolBar->setObjectName(QStringLiteral("mainToolBar"));
         MainWindow->addToolBar(Qt::TopToolBarArea, mainToolBar);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QStringLiteral("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 540, 21));
+        menuBar->setGeometry(QRect(0, 0, 540, 17));
         MainWindow->setMenuBar(menuBar);
         statusBar = new QStatusBar(MainWindow);
         statusBar->setObjectName(QStringLiteral("statusBar"));
@@ -125,6 +129,7 @@ public:
         modeBtn->setText(QString());
         totalTimeLabel->setText(QApplication::translate("MainWindow", "TextLabel", Q_NULLPTR));
         currentTimeLabel->setText(QApplication::translate("MainWindow", "TextLabel", Q_NULLPTR));
+        themeBtn->setText(QString());
     } // retranslateUi
 
 };
