@@ -9,6 +9,7 @@
 #include <QFileDialog>
 #include<QSlider>
 #include<QLabel>
+#include<QListWidgetItem>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -70,6 +71,8 @@ public slots:
     void handleProgressSliderPressed();
     //进度条释放
     void handleProgressSliderReleased();
+    //列表点击
+    void handleMusicListItemClicked(QListWidgetItem *item);
 
 private:
     //音乐播放器

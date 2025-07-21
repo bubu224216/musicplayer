@@ -209,24 +209,8 @@ void MainWindow::initButtons() {
 
 
     // 列表项点击播放
-    connect(ui->musicList, &QListWidget::itemClicked, this, [this](QListWidgetItem *item) {
-        m_isManualSwitch = true;
-        int row = ui->musicList->row(item);
-        if (m_mode == RANDOM_MODE) {
-            for (int i = 0; i < m_shuffleList.size(); ++i) {
-                if (m_shuffleList[i] == row) {
-                    m_shuffleIndex = i;
-                    break;
-                }
-            }
-        }
-        QString musicFile = musicDir + item->text() + ".mp3";
-        m_player->setMedia(QUrl::fromLocalFile(musicFile));
-        m_player->play();
-        ui->playBtn->setIcon(QIcon(":/res/pause.png"));
-
-        m_isManualSwitch = false;
-    });
+    // 在initButtons()函数中
+    connect(ui->musicList, &QListWidget::itemClicked, this, &MainWindow::handleMusicListItemClicked);
 }
 
 //播放按钮的槽函数
@@ -342,6 +326,39 @@ void MainWindow::handlePrevSlot(){
     m_isManualSwitch = false;
 }
 
+//列表点击播放音乐的槽函数
+void MainWindow::handleMusicListItemClicked(QListWidgetItem *item)
+{
+    m_isManualSwitch = true;
+    int row = ui->musicList->row(item);
+
+    // 更新随机播放模式下的索引
+    if (m_mode == RANDOM_MODE) {
+        for (int i = 0; i < m_shuffleList.size(); ++i) {
+            if (m_shuffleList[i] == row) {
+                m_shuffleIndex = i;
+                break;
+            }
+        }
+    }
+
+    // 使用m_fullFileNameMap获取完整文件名（含后缀）
+    QString musicName = item->text();
+    QString fullFileName = m_fullFileNameMap.value(musicName);
+    if (fullFileName.isEmpty()) {
+        QMessageBox::warning(this, "错误", "未找到音乐文件：" + musicName);
+        m_isManualSwitch = false;
+        return;
+    }
+
+    QString Abs = musicDir + fullFileName;
+    qDebug() << "播放路径：" << Abs;
+    m_player->setMedia(QUrl::fromLocalFile(Abs));
+    m_player->play();
+    ui->playBtn->setIcon(QIcon(":/res/pause.png"));
+
+    m_isManualSwitch = false;
+}
 // 添加音乐文件的槽函数
 void MainWindow::handleAddMusicSlot() {
     QStringList filePaths = QFileDialog::getOpenFileNames(
