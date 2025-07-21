@@ -18,11 +18,8 @@
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QListWidget>
 #include <QtWidgets/QMainWindow>
-#include <QtWidgets/QMenuBar>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QSlider>
-#include <QtWidgets/QStatusBar>
-#include <QtWidgets/QToolBar>
 #include <QtWidgets/QWidget>
 
 QT_BEGIN_NAMESPACE
@@ -43,9 +40,6 @@ public:
     QLabel *totalTimeLabel;
     QLabel *currentTimeLabel;
     QPushButton *themeBtn;
-    QToolBar *mainToolBar;
-    QMenuBar *menuBar;
-    QStatusBar *statusBar;
 
     void setupUi(QMainWindow *MainWindow)
     {
@@ -103,16 +97,6 @@ public:
         themeBtn->setObjectName(QStringLiteral("themeBtn"));
         themeBtn->setGeometry(QRect(150, 160, 80, 15));
         MainWindow->setCentralWidget(centralWidget);
-        mainToolBar = new QToolBar(MainWindow);
-        mainToolBar->setObjectName(QStringLiteral("mainToolBar"));
-        MainWindow->addToolBar(Qt::TopToolBarArea, mainToolBar);
-        menuBar = new QMenuBar(MainWindow);
-        menuBar->setObjectName(QStringLiteral("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 540, 17));
-        MainWindow->setMenuBar(menuBar);
-        statusBar = new QStatusBar(MainWindow);
-        statusBar->setObjectName(QStringLiteral("statusBar"));
-        MainWindow->setStatusBar(statusBar);
 
         retranslateUi(MainWindow);
 
@@ -127,8 +111,8 @@ public:
         nextBtn->setText(QString());
         listBtn->setText(QString());
         modeBtn->setText(QString());
-        totalTimeLabel->setText(QApplication::translate("MainWindow", "TextLabel", Q_NULLPTR));
-        currentTimeLabel->setText(QApplication::translate("MainWindow", "TextLabel", Q_NULLPTR));
+        totalTimeLabel->setText(QApplication::translate("MainWindow", "00:00", Q_NULLPTR));
+        currentTimeLabel->setText(QApplication::translate("MainWindow", "00:00", Q_NULLPTR));
         themeBtn->setText(QString());
     } // retranslateUi
 
