@@ -17,6 +17,7 @@
 #include <QDebug>
 #include <time.h>
 #include <vector>
+#include <QToolBar>
 
 
 //构造函数以及ui外观的设计
@@ -28,9 +29,31 @@ MainWindow::MainWindow(QWidget *parent) :
     m_isManualSwitch(false) // 初始化为 false  防止自动播放和手动播放之间的冲突
 {
     ui->setupUi(this);
+    resize(1680, 1000);
     setWindowTitle("音乐播放器");
 
+    QWidget *controlPanel = new QWidget(this);
+    controlPanel->setStyleSheet("background-color: rgba(255, 255, 255, 180); border-radius: 10px;");
+
+
     m_player = new QMediaPlayer(this);
+    QToolBar *toolBar = addToolBar("工具栏");
+    toolBar->setMovable(false); // 禁止拖动
+    toolBar->setStyleSheet("QToolBar { background: transparent; border: none; }");
+
+    QWidget *spacer = new QWidget(this);
+    spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    toolBar->addWidget(spacer);
+
+    QAction *addMusicAction = new QAction(QIcon(":/res/add_to.png"), "添加音乐", this);
+    QAction *changeThemeAction = new QAction(QIcon(":/res/theme.png"), "更换主题", this);
+
+    toolBar->addAction(addMusicAction);
+    toolBar->addAction(changeThemeAction);
+
+    connect(addMusicAction, &QAction::triggered, this, &MainWindow::handleAddMusicSlot);
+    connect(changeThemeAction, &QAction::triggered, this, &MainWindow::handleChangeBackgroundSlot);
+
 
     // 中央部件布局
     QWidget *centralWidget = new QWidget(this);
@@ -47,6 +70,9 @@ MainWindow::MainWindow(QWidget *parent) :
     QVBoxLayout *listLayout = new QVBoxLayout(listWidget);
     listLayout->setContentsMargins(0, 0, 0, 0);
     listLayout->setSpacing(0);
+
+    splitter->setHandleWidth(0);
+
     ui->musicList->setStyleSheet("QListWidget {"
                                  "    background-color: transparent;"
                                  "    border: 1px solid #ddd;"
@@ -60,6 +86,8 @@ MainWindow::MainWindow(QWidget *parent) :
                                  "    background-color: rgba(204, 229, 255, 0.5);"
                                  "    color: #004085;"
                                  "}");
+    ui->musicList->setStyleSheet("QListWidget { background: transparent; border: none; }");
+
     listLayout->addWidget(ui->musicList);
 
     QWidget *playerWidget = new QWidget(this);
@@ -123,13 +151,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
 
-    QWidget *buttonContainer2 = new QWidget(this);
-    QVBoxLayout *buttonLayout2 = new QVBoxLayout(buttonContainer2);
-    buttonLayout2->addWidget(ui->addBtn);
-    buttonLayout2->addStretch();
-    buttonLayout2->addWidget(ui->themeBtn);
-    buttonLayout2->addStretch();
-    playerLayout->addWidget(buttonContainer2);
 
     m_listWidget = listWidget;
 
@@ -143,6 +164,26 @@ MainWindow::MainWindow(QWidget *parent) :
     splitter->setSizes(QList<int>() << 200 << 400);
     mainLayout->addWidget(splitter);
     setBackGround(":/res/bcakground.jpg");
+
+    QVBoxLayout *controlLayout = new QVBoxLayout(controlPanel);
+    controlLayout->setContentsMargins(15, 10, 15, 10);
+    controlLayout->setSpacing(10);
+
+    // 添加进度条区域（已有的 progressLayout）
+    controlLayout->addLayout(progressLayout);
+
+    // 添加按钮区域（已有的 buttonLayout）
+    controlLayout->addWidget(buttonContainer);  // 包含播放、暂停等按钮
+    playerLayout->addWidget(controlPanel);
+    controlPanel->setStyleSheet(R"(
+        QWidget {
+            background-color: rgba(255, 255, 255, 200);
+            border-radius: 15px;
+            border: 1px solid #ccc;
+        }
+    )");
+
+
     initButtons();
 
     //后面添加了图形界面添加歌曲

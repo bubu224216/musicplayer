@@ -18,6 +18,7 @@
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QListWidget>
 #include <QtWidgets/QMainWindow>
+#include <QtWidgets/QMenuBar>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QSlider>
 #include <QtWidgets/QToolButton>
@@ -44,6 +45,7 @@ public:
     QToolButton *soundBtn;
     QPushButton *togglelistBtn;
     QWidget *widget_2;
+    QMenuBar *menuBar;
 
     void setupUi(QMainWindow *MainWindow)
     {
@@ -110,6 +112,10 @@ public:
         widget_2->setObjectName(QStringLiteral("widget_2"));
         widget_2->setGeometry(QRect(160, 20, 120, 80));
         MainWindow->setCentralWidget(centralWidget);
+        menuBar = new QMenuBar(MainWindow);
+        menuBar->setObjectName(QStringLiteral("menuBar"));
+        menuBar->setGeometry(QRect(0, 0, 540, 17));
+        MainWindow->setMenuBar(menuBar);
 
         retranslateUi(MainWindow);
 
