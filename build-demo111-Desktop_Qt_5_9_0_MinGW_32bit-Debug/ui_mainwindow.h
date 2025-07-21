@@ -108,7 +108,7 @@ public:
         MainWindow->addToolBar(Qt::TopToolBarArea, mainToolBar);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QStringLiteral("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 540, 17));
+        menuBar->setGeometry(QRect(0, 0, 540, 21));
         MainWindow->setMenuBar(menuBar);
         statusBar = new QStatusBar(MainWindow);
         statusBar->setObjectName(QStringLiteral("statusBar"));
@@ -127,8 +127,8 @@ public:
         nextBtn->setText(QString());
         listBtn->setText(QString());
         modeBtn->setText(QString());
-        totalTimeLabel->setText(QApplication::translate("MainWindow", "TextLabel", Q_NULLPTR));
-        currentTimeLabel->setText(QApplication::translate("MainWindow", "TextLabel", Q_NULLPTR));
+        totalTimeLabel->setText(QApplication::translate("MainWindow", "00\357\274\23200", Q_NULLPTR));
+        currentTimeLabel->setText(QApplication::translate("MainWindow", "00\357\274\23200", Q_NULLPTR));
         themeBtn->setText(QString());
     } // retranslateUi
 

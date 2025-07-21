@@ -94,7 +94,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>TextLabel</string>
+     <string>00：00</string>
     </property>
    </widget>
    <widget class="QLabel" name="currentTimeLabel">
@@ -107,7 +107,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>TextLabel</string>
+     <string>00：00</string>
     </property>
    </widget>
    <widget class="QPushButton" name="themeBtn">
@@ -138,7 +138,7 @@
      <x>0</x>
      <y>0</y>
      <width>540</width>
-     <height>17</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>
