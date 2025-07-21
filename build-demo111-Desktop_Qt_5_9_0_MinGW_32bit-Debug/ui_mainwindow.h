@@ -18,11 +18,9 @@
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QListWidget>
 #include <QtWidgets/QMainWindow>
-#include <QtWidgets/QMenuBar>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QSlider>
-#include <QtWidgets/QStatusBar>
-#include <QtWidgets/QToolBar>
+#include <QtWidgets/QToolButton>
 #include <QtWidgets/QWidget>
 
 QT_BEGIN_NAMESPACE
@@ -36,16 +34,16 @@ public:
     QPushButton *preBtn;
     QPushButton *playBtn;
     QPushButton *nextBtn;
-    QPushButton *listBtn;
+    QPushButton *addBtn;
     QPushButton *modeBtn;
     QListWidget *musicList;
     QSlider *progressSlider;
     QLabel *totalTimeLabel;
     QLabel *currentTimeLabel;
     QPushButton *themeBtn;
-    QToolBar *mainToolBar;
-    QMenuBar *menuBar;
-    QStatusBar *statusBar;
+    QToolButton *soundBtn;
+    QPushButton *togglelistBtn;
+    QWidget *widget_2;
 
     void setupUi(QMainWindow *MainWindow)
     {
@@ -76,10 +74,10 @@ public:
 
         horizontalLayout->addWidget(nextBtn);
 
-        listBtn = new QPushButton(widget);
-        listBtn->setObjectName(QStringLiteral("listBtn"));
+        addBtn = new QPushButton(widget);
+        addBtn->setObjectName(QStringLiteral("addBtn"));
 
-        horizontalLayout->addWidget(listBtn);
+        horizontalLayout->addWidget(addBtn);
 
         modeBtn = new QPushButton(widget);
         modeBtn->setObjectName(QStringLiteral("modeBtn"));
@@ -102,17 +100,16 @@ public:
         themeBtn = new QPushButton(centralWidget);
         themeBtn->setObjectName(QStringLiteral("themeBtn"));
         themeBtn->setGeometry(QRect(150, 160, 80, 15));
+        soundBtn = new QToolButton(centralWidget);
+        soundBtn->setObjectName(QStringLiteral("soundBtn"));
+        soundBtn->setGeometry(QRect(220, 180, 32, 16));
+        togglelistBtn = new QPushButton(centralWidget);
+        togglelistBtn->setObjectName(QStringLiteral("togglelistBtn"));
+        togglelistBtn->setGeometry(QRect(90, 30, 80, 15));
+        widget_2 = new QWidget(centralWidget);
+        widget_2->setObjectName(QStringLiteral("widget_2"));
+        widget_2->setGeometry(QRect(160, 20, 120, 80));
         MainWindow->setCentralWidget(centralWidget);
-        mainToolBar = new QToolBar(MainWindow);
-        mainToolBar->setObjectName(QStringLiteral("mainToolBar"));
-        MainWindow->addToolBar(Qt::TopToolBarArea, mainToolBar);
-        menuBar = new QMenuBar(MainWindow);
-        menuBar->setObjectName(QStringLiteral("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 540, 21));
-        MainWindow->setMenuBar(menuBar);
-        statusBar = new QStatusBar(MainWindow);
-        statusBar->setObjectName(QStringLiteral("statusBar"));
-        MainWindow->setStatusBar(statusBar);
 
         retranslateUi(MainWindow);
 
@@ -125,11 +122,13 @@ public:
         preBtn->setText(QString());
         playBtn->setText(QString());
         nextBtn->setText(QString());
-        listBtn->setText(QString());
+        addBtn->setText(QString());
         modeBtn->setText(QString());
-        totalTimeLabel->setText(QApplication::translate("MainWindow", "00\357\274\23200", Q_NULLPTR));
-        currentTimeLabel->setText(QApplication::translate("MainWindow", "00\357\274\23200", Q_NULLPTR));
+        totalTimeLabel->setText(QApplication::translate("MainWindow", "00:00", Q_NULLPTR));
+        currentTimeLabel->setText(QApplication::translate("MainWindow", "00:00", Q_NULLPTR));
         themeBtn->setText(QString());
+        soundBtn->setText(QApplication::translate("MainWindow", "...", Q_NULLPTR));
+        togglelistBtn->setText(QString());
     } // retranslateUi
 
 };

@@ -20,5 +20,6 @@
         <file>res/sound.png</file>
         <file>res/bcakground.jpg</file>
         <file>res/theme.png</file>
+        <file>res/playlist.png</file>
     </qresource>
 </RCC>

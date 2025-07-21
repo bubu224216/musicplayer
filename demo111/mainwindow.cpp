@@ -48,7 +48,7 @@ MainWindow::MainWindow(QWidget *parent) :
     listLayout->setContentsMargins(0, 0, 0, 0);
     listLayout->setSpacing(0);
     ui->musicList->setStyleSheet("QListWidget {"
-                                 "    background-color: #f5f5f5;"
+                                 "    background-color: transparent;"
                                  "    border: 1px solid #ddd;"
                                  "}"
                                  "QListWidget::item {"
@@ -57,7 +57,7 @@ MainWindow::MainWindow(QWidget *parent) :
                                  "    font-size: 14px;"
                                  "}"
                                  "QListWidget::item:selected {"
-                                 "    background-color: #cce5ff;"
+                                 "    background-color: rgba(204, 229, 255, 0.5);"
                                  "    color: #004085;"
                                  "}");
     listLayout->addWidget(ui->musicList);
@@ -116,10 +116,23 @@ MainWindow::MainWindow(QWidget *parent) :
     buttonLayout->addStretch();
     buttonLayout->addWidget(ui->modeBtn);
     buttonLayout->addStretch();
-    buttonLayout->addWidget(ui->listBtn);
+    buttonLayout->addWidget(ui->soundBtn);
     buttonLayout->addStretch();
-    buttonLayout->addWidget(ui->themeBtn);
+    buttonLayout->addWidget(ui->togglelistBtn);
     buttonLayout->addStretch();
+
+
+
+    QWidget *buttonContainer2 = new QWidget(this);
+    QVBoxLayout *buttonLayout2 = new QVBoxLayout(buttonContainer2);
+    buttonLayout2->addWidget(ui->addBtn);
+    buttonLayout2->addStretch();
+    buttonLayout2->addWidget(ui->themeBtn);
+    buttonLayout2->addStretch();
+    playerLayout->addWidget(buttonContainer2);
+
+    m_listWidget = listWidget;
+
 
 
     playerLayout->addStretch();
@@ -156,11 +169,11 @@ MainWindow::MainWindow(QWidget *parent) :
 }
 
 //按钮的外观设计代码
-void MainWindow::setButtonStyle(QPushButton* button, const QString& filename) {
+void MainWindow::setButtonStyle(QAbstractButton* button, const QString& filename) {
     button->setFixedSize(80, 80);
     button->setIconSize(QSize(80, 80));
     button->setIcon(QIcon(filename));
-    button->setStyleSheet("QPushButton {"
+    button->setStyleSheet("QAbstractButton {"
                           "    background-color: transparent;"
                           "    border: none;"
                           "    padding: 5px;"
@@ -197,15 +210,19 @@ void MainWindow::initButtons() {
     setButtonStyle(ui->playBtn, ":/res/play.png");
     setButtonStyle(ui->nextBtn, ":/res/next.png");
     setButtonStyle(ui->modeBtn, ":/res/list.png");
-    setButtonStyle(ui->listBtn, ":/res/pure.png");
+    setButtonStyle(ui->addBtn, ":/res/add_to.png");
     setButtonStyle(ui->themeBtn, ":/res/theme.png");
+    setButtonStyle(ui->soundBtn, ":/res/sound.png");
+    setButtonStyle(ui->togglelistBtn, ":/res/playlist.png");
+
 
     connect(ui->playBtn, &QPushButton::clicked, this, &MainWindow::handlePlaySlot);
     connect(ui->modeBtn, &QPushButton::clicked, this, &MainWindow::handleModeSlot);
     connect(ui->nextBtn,&QPushButton::clicked,this,&MainWindow::handleNextSlot);
     connect(ui->preBtn,&QPushButton::clicked,this,&MainWindow::handlePrevSlot);
-    connect(ui->listBtn, &QPushButton::clicked, this, &MainWindow::handleAddMusicSlot);
+    connect(ui->addBtn, &QPushButton::clicked, this, &MainWindow::handleAddMusicSlot);
     connect(ui->themeBtn, &QPushButton::clicked, this, &MainWindow::handleChangeBackgroundSlot);
+    connect(ui->togglelistBtn, &QPushButton::clicked, this, &MainWindow::handleToggleListSlot);
 
 
     // 列表项点击播放
@@ -430,6 +447,16 @@ void MainWindow::handleChangeBackgroundSlot(){
         setBackGround(filePath);
 
 }
+
+void MainWindow::handleToggleListSlot(){
+    if (m_listWidget->isVisible()) {
+           m_listWidget->hide();
+       } else {
+           m_listWidget->show();
+       }
+
+}
+
 
 //开始播放音乐函数
 void MainWindow::startPlayMusic() {
