@@ -60,7 +60,6 @@ private:
     void loadLyricForCurrentSong();
     void updateLyricDisplay();
 
-//    void resizeEvent1(QResizeEvent *event);
     // ===== 成员变量 =====
     QMediaPlayer* m_player;              // 音乐播放器
     PLAYMODE m_mode;                     // 当前播放模式
@@ -109,7 +108,6 @@ private slots:
     void handleProgressSliderReleased();        // 拖动释放
     void onVolumeSliderValueChanged(int k);//切换静音
 
-    void updateLyricHeight();
 
 };
 

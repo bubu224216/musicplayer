@@ -106,11 +106,8 @@ MainWindow::MainWindow(QWidget *parent) :
     topLayout->addWidget(listWidget);  // 左侧音乐列表
 //    topLayout->addStretch();           // 右侧空白或封面等
 
-    // 设置 topWidget 的尺寸策略，避免无限扩展
-    topWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-
     mainLayout->addWidget(topWidget); // 添加上半部分（列表）
-//    mainLayout->addStretch();  // 移除这行，避免布局无限扩展
+    mainLayout->addStretch();
     mainLayout->addWidget(playerWidget);   // 播放区统一置底
 
 
@@ -118,11 +115,14 @@ MainWindow::MainWindow(QWidget *parent) :
     m_lyricWidget = new QWidget(this);
     m_lyricWidget->setMinimumHeight(500);
     m_lyricWidget->setMinimumWidth(900);
-    m_lyricWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+
+    m_lyricWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     m_lyricWidget->setStyleSheet("background-color: rgba(0, 0, 0, 0.3); border-radius: 5px;");
     m_lyricLayout = new QVBoxLayout(m_lyricWidget);
     m_lyricLayout->setAlignment(Qt::AlignCenter);
     m_lyricLayout->setSpacing(10);
+
+
 
     // 歌曲封面
     QWidget *cover = new QWidget;
@@ -145,12 +145,12 @@ MainWindow::MainWindow(QWidget *parent) :
     cover->setAutoFillBackground(true);  // 启用自动填充背景
     m_lyricLayout->addWidget(cover);
 
-    // 添加歌词区域的拉伸项，确保封面在顶部
-    m_lyricLayout->addStretch();
+
+
+
 
     topLayout->addWidget(m_lyricWidget);  // 添加到右侧布局
-    // 设置歌词组件的拉伸因子，避免无限扩展
-    topLayout->setStretchFactor(m_lyricWidget, 1);
+
 
 
     // 5.2 进度条布局（水平）
@@ -215,8 +215,7 @@ MainWindow::MainWindow(QWidget *parent) :
 //    playerLayout->addStretch();  // 歌词与控制区间的空白
     playerLayout->addWidget(controlPanel);
 
-    // 设置 playerWidget 的尺寸策略，确保高度固定
-    playerWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+
 
     setBackGround(":/bcakground.jpg");  // 设置背景
 
@@ -780,6 +779,7 @@ void MainWindow::updateLyricDisplay(){
 }
 
 
+
 // 添加新的槽函数
 void MainWindow::onVolumeSliderValueChanged(int value) {
     m_player->setVolume(value);  // 设置播放器音量
@@ -791,21 +791,7 @@ void MainWindow::onVolumeSliderValueChanged(int value) {
     }
 }
 
-// 添加辅助函数更新歌词组件高度
-void MainWindow::updateLyricHeight() {
-    int availableHeight = this->contentsRect().height();
-    int controlHeight = 200; // 控制区固定高度
 
-    // 计算歌词区域高度（窗口高度 - 控制区高度 - 工具栏高度 - 其他组件高度）
-    // 这里简化为窗口高度减去控制区高度
-    int lyricHeight = availableHeight - controlHeight;
-
-    // 添加安全限制，避免高度过小或过大
-    lyricHeight = qMax(lyricHeight, 300); // 最小高度
-    lyricHeight = qMin(lyricHeight, 1500); // 最大高度
-
-    m_lyricWidget->setFixedHeight(lyricHeight);
-}
 
 
 // ------------------------------
@@ -815,5 +801,12 @@ void MainWindow::updateLyricHeight() {
 // 窗口大小改变事件
 void MainWindow::resizeEvent(QResizeEvent *event) {
     QMainWindow::resizeEvent(event);
-    updateLyricHeight();
+    // 获取窗口内容区域高度
+       int totalHeight = this->contentsRect().height();
+
+       // 设置歌词组件高度为 窗口高度 - 200
+       m_lyricWidget->setFixedHeight(totalHeight - 200);
+
+       // 如果使用布局管理器，还需强制更新布局
+       this->layout()->update();
 }

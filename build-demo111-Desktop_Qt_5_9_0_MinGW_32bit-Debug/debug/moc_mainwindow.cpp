@@ -21,8 +21,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_MainWindow_t {
-    QByteArrayData data[22];
-    char stringdata0[352];
+    QByteArrayData data[21];
+    char stringdata0[334];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -51,8 +51,7 @@ QT_MOC_LITERAL(16, 236, 11), // "setPosition"
 QT_MOC_LITERAL(17, 248, 27), // "handleProgressSliderPressed"
 QT_MOC_LITERAL(18, 276, 28), // "handleProgressSliderReleased"
 QT_MOC_LITERAL(19, 305, 26), // "onVolumeSliderValueChanged"
-QT_MOC_LITERAL(20, 332, 1), // "k"
-QT_MOC_LITERAL(21, 334, 17) // "updateLyricHeight"
+QT_MOC_LITERAL(20, 332, 1) // "k"
 
     },
     "MainWindow\0handlePlaySlot\0\0handleModeSlot\0"
@@ -63,8 +62,7 @@ QT_MOC_LITERAL(21, 334, 17) // "updateLyricHeight"
     "position\0updateDuration\0duration\0"
     "setPosition\0handleProgressSliderPressed\0"
     "handleProgressSliderReleased\0"
-    "onVolumeSliderValueChanged\0k\0"
-    "updateLyricHeight"
+    "onVolumeSliderValueChanged\0k"
 };
 #undef QT_MOC_LITERAL
 
@@ -74,7 +72,7 @@ static const uint qt_meta_data_MainWindow[] = {
        7,       // revision
        0,       // classname
        0,    0, // classinfo
-      15,   14, // methods
+      14,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -82,21 +80,20 @@ static const uint qt_meta_data_MainWindow[] = {
        0,       // signalCount
 
  // slots: name, argc, parameters, tag, flags
-       1,    0,   89,    2, 0x08 /* Private */,
-       3,    0,   90,    2, 0x08 /* Private */,
-       4,    0,   91,    2, 0x08 /* Private */,
-       5,    0,   92,    2, 0x08 /* Private */,
-       6,    0,   93,    2, 0x08 /* Private */,
-       7,    0,   94,    2, 0x08 /* Private */,
-       8,    0,   95,    2, 0x08 /* Private */,
-       9,    1,   96,    2, 0x08 /* Private */,
-      12,    1,   99,    2, 0x08 /* Private */,
-      14,    1,  102,    2, 0x08 /* Private */,
-      16,    1,  105,    2, 0x08 /* Private */,
-      17,    0,  108,    2, 0x08 /* Private */,
-      18,    0,  109,    2, 0x08 /* Private */,
-      19,    1,  110,    2, 0x08 /* Private */,
-      21,    0,  113,    2, 0x08 /* Private */,
+       1,    0,   84,    2, 0x08 /* Private */,
+       3,    0,   85,    2, 0x08 /* Private */,
+       4,    0,   86,    2, 0x08 /* Private */,
+       5,    0,   87,    2, 0x08 /* Private */,
+       6,    0,   88,    2, 0x08 /* Private */,
+       7,    0,   89,    2, 0x08 /* Private */,
+       8,    0,   90,    2, 0x08 /* Private */,
+       9,    1,   91,    2, 0x08 /* Private */,
+      12,    1,   94,    2, 0x08 /* Private */,
+      14,    1,   97,    2, 0x08 /* Private */,
+      16,    1,  100,    2, 0x08 /* Private */,
+      17,    0,  103,    2, 0x08 /* Private */,
+      18,    0,  104,    2, 0x08 /* Private */,
+      19,    1,  105,    2, 0x08 /* Private */,
 
  // slots: parameters
     QMetaType::Void,
@@ -113,7 +110,6 @@ static const uint qt_meta_data_MainWindow[] = {
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void, QMetaType::Int,   20,
-    QMetaType::Void,
 
        0        // eod
 };
@@ -138,7 +134,6 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         case 11: _t->handleProgressSliderPressed(); break;
         case 12: _t->handleProgressSliderReleased(); break;
         case 13: _t->onVolumeSliderValueChanged((*reinterpret_cast< int(*)>(_a[1]))); break;
-        case 14: _t->updateLyricHeight(); break;
         default: ;
         }
     }
@@ -169,13 +164,13 @@ int MainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 15)
+        if (_id < 14)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 15;
+        _id -= 14;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 15)
+        if (_id < 14)
             *reinterpret_cast<int*>(_a[0]) = -1;
-        _id -= 15;
+        _id -= 14;
     }
     return _id;
 }
