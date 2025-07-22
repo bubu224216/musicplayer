@@ -23,6 +23,11 @@
 #include <vector>
 #include <algorithm>
 #include<QMediaMetaData>
+#include <QFont>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QStandardPaths>
 
 
 // 构造函数：按"基础初始化→组件创建→布局组装→信号连接"分步实现
@@ -41,6 +46,8 @@ MainWindow::MainWindow(QWidget *parent) :
     setWindowTitle("音乐播放器");
     m_player = new QMediaPlayer(this);  // 播放器核心组件
 
+    setWindowIcon(QIcon(":/pause.png"));
+
     // 主布局容器初始化
     QWidget *centralWidget = new QWidget(this);
     setCentralWidget(centralWidget);
@@ -58,11 +65,14 @@ MainWindow::MainWindow(QWidget *parent) :
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     toolBar->addWidget(spacer);
     // 工具栏按钮
+    QAction *deleteMusicAction = new QAction(QIcon(":/delete.png"), "删除音乐", this);
     QAction *addMusicAction = new QAction(QIcon(":/add_to.png"), "添加音乐", this);
     QAction *changeThemeAction = new QAction(QIcon(":/theme.png"), "更换主题", this);
+    toolBar->addAction(deleteMusicAction);
     toolBar->addAction(addMusicAction);
     toolBar->addAction(changeThemeAction);
     // 工具栏信号连接（提前连接，避免分散）
+    connect(deleteMusicAction, &QAction::triggered, this, &MainWindow::handleDeleteMusicSlot);
     connect(addMusicAction, &QAction::triggered, this, &MainWindow::handleAddMusicSlot);
     connect(changeThemeAction, &QAction::triggered, this, &MainWindow::handleChangeBackgroundSlot);
 
@@ -76,19 +86,33 @@ MainWindow::MainWindow(QWidget *parent) :
     listLayout->setSpacing(0);
     // 列表样式
     ui->musicList->setStyleSheet("QListWidget {"
-                                 "    background: transparent;"
-                                 "    border: none;"
-                                 "}"
-                                 "QListWidget::item {"
-                                 "    padding: 5px 10px;"
-                                 "    border-bottom: 1px solid #eee;"
-                                 "    font-size: 14px;"
-                                 "}"
-                                 "QListWidget::item:selected {"
-                                 "    background-color: rgba(204, 229, 255, 0.5);"
-                                 "    color: #004085;"
-                                 "}");
+                                     "    background: transparent;"
+                                     "    border: none;"
+                                     "}"
+                                     "QListWidget::item {"
+                                        "    border: none;"
+                                        "    outline: none;"
+                                        "    color: #6495ed;"
+                                        "}"
+                                     "QListWidget::item:selected {"
+                                     "    background: transparent;"
+                                     "    color: #f8f8ff;"
+                                     "    outline: none;"   // 去掉焦点框
+                                     "}"
+                                     "QListWidget::item:focus {"
+                                         "    outline: none;"   // 去掉焦点框
+                                         "}"
+                                     );
+    ui->musicList->setFocusPolicy(Qt::NoFocus);
+    QFont font("微软雅黑", 15);
+    font.setWeight(QFont::Normal);
+    ui->musicList->setFont(font);
     listLayout->addWidget(ui->musicList);
+    ui->musicList->setGridSize(QSize(0, 60));  // 60像素行高，可根据需要调整
+
+    // 允许列表多选（按住Ctrl或Shift键选择多个项）
+    ui->musicList->setSelectionMode(QAbstractItemView::ExtendedSelection);
+
     m_listWidget = listWidget;  // 保存列表容器引用
 
 
@@ -118,7 +142,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_lyricWidget->setMinimumWidth(900);
 
     m_lyricWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    m_lyricWidget->setStyleSheet("background-color: rgba(0, 0, 0, 0.3); border-radius: 5px;");
+    m_lyricWidget->setStyleSheet("background-color: rgba(0, 0, 0, 0); border-radius: 5px;");
     m_lyricLayout = new QVBoxLayout(m_lyricWidget);
     m_lyricLayout->setAlignment(Qt::AlignCenter);
     m_lyricLayout->setSpacing(1);
@@ -129,6 +153,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
     topLayout->addWidget(m_lyricWidget);  // 添加到右侧布局
+    topLayout->setStretch(0, 1);  // 第0个控件（musicList）
+    topLayout->setStretch(1, 2);  // 第1个控件（lyrics）
 
 
 
@@ -196,12 +222,13 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
 
-    setBackGround(":/bcakground.jpg");  // 设置背景
+    setBackGround(":/bk2.jpg");  // 设置背景
 
 
     // 第七步：初始化与信号连接
     initButtons();  // 按钮样式与信号
     initCoverDisplay();
+    initSystemTray();
     srand(time(NULL));  // 随机数种子（用于随机播放）
 
 
@@ -249,6 +276,11 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(m_progressSlider, &QSlider::sliderMoved, this, &MainWindow::setPosition);
     connect(m_progressSlider, &QSlider::sliderPressed, this, &MainWindow::handleProgressSliderPressed);
     connect(m_progressSlider, &QSlider::sliderReleased, this, &MainWindow::handleProgressSliderReleased);
+
+
+    // 最后加载保存的播放列表
+    //获取上一次的歌单信息
+    loadPlayList();
 }
 
 
@@ -460,6 +492,52 @@ void MainWindow::handleAddMusicSlot(){
     }
 }
 
+// 批量删除选中的音乐
+void MainWindow::handleDeleteMusicSlot() {
+    // 获取所有选中的项
+    QList<QListWidgetItem*> selectedItems = ui->musicList->selectedItems();
+    if (selectedItems.isEmpty()) {
+        QMessageBox::information(this, "提示", "请先选中要删除的音乐（可按住Ctrl/Shift多选）");
+        return;
+    }
+
+    // 确认删除（显示选中的数量）
+    int ret = QMessageBox::question(
+        this, "确认删除",
+        QString("确定要从列表中删除选中的 %1 首音乐吗？\n（此操作不会删除本地文件）")
+            .arg(selectedItems.size()),
+        QMessageBox::Yes | QMessageBox::No, QMessageBox::No
+    );
+    if (ret != QMessageBox::Yes) return;
+
+    // 记录正在播放的音乐（用于后续处理）
+    QString playingMusic;
+    bool isPlaying = (m_player->state() == QMediaPlayer::PlayingState ||
+                     m_player->state() == QMediaPlayer::PausedState);
+    if (isPlaying && ui->musicList->currentItem()) {
+        playingMusic = ui->musicList->currentItem()->text();
+    }
+
+    // 批量删除选中项
+    for (QListWidgetItem* item : selectedItems) {
+        // 从映射表中删除
+        m_fullFileNameMap.remove(item->text());
+        // 从列表中删除（会自动释放内存）
+        delete item;
+    }
+
+    // 处理正在播放的音乐被删除的情况
+    if (isPlaying && !m_fullFileNameMap.contains(playingMusic)) {
+        m_player->stop();
+        ui->playBtn->setIcon(QIcon(":/bofang.png"));
+
+        // 如果还有音乐，自动播放第一项
+        if (ui->musicList->count() > 0) {
+            ui->musicList->setCurrentRow(0);
+            startPlayMusic();
+        }
+    }
+}
 
 // ------------------------------
 // 四、进度条与歌词槽函数
@@ -614,6 +692,9 @@ void MainWindow::startPlayMusic(){
     m_currentTimeLabel->setText("00:00");
     m_totalTimeLabel->setText("00:00");
     loadLyricForCurrentSong();
+
+    QString musicName1 = ui->musicList->currentItem()->text();
+    showDesktopNotification("正在播放", musicName1);
 }
 
 // 生成随机播放列表
@@ -671,6 +752,11 @@ bool MainWindow::parseLyricFile(const QString& filePath){
 
 // 加载当前歌曲的歌词
 void MainWindow::loadLyricForCurrentSong() {
+
+    QFont baseFont("楷体", 14); // 设置默认字体和大小
+    baseFont.setItalic(false);
+    baseFont.setBold(false);
+
     qDeleteAll(m_lyricLabels);  // 清除旧歌词
     m_lyricLabels.clear();
     m_lyrics.clear();
@@ -703,10 +789,9 @@ void MainWindow::loadLyricForCurrentSong() {
     if (parseLyricFile(lyricFilePath)) {
         for (const Lyric& lyric : m_lyrics) {
             QLabel* label = new QLabel(lyric.content, m_lyricWidget);
+            label->setFont(baseFont);
             // 设置透明背景（关键修改）
-            label->setStyleSheet("color: #CCCCCC; font-size: 14px;"
-                                "background-color: transparent;  /* 背景透明 */"
-                                "border: none;");  /* 无边框 */
+            label->setStyleSheet("color: #CCCCCC; background-color: transparent; border: none;");
             label->setAlignment(Qt::AlignCenter);
             m_lyricLabels.append(label);
             m_lyricLayout->addWidget(label);
@@ -739,20 +824,25 @@ void MainWindow::updateLyricDisplay(){
         int startIndex = qMax(0, m_currentLyricIndex - 1);
         int endIndex = qMin(m_lyricLabels.size() - 1, m_currentLyricIndex + 1);
 
+
         for (int i = startIndex; i <= endIndex; ++i) {
             if (i < m_lyricLabels.size()) {
+                m_lyricLabels[i]->setStyleSheet(
+                    "color: #FFFFFF; font-size: 50px; font-weight: bold;"
+                    "background-color: transparent; border: none;"
+                );
                 m_lyricLabels[i]->show();
                 if (i == m_currentLyricIndex) {
                     // 当前歌词：白色加粗+放大+阴影
                     m_lyricLabels[i]->setStyleSheet(
-                        "color: #FFFFFF; font-size: 20px; font-weight: bold;"
-                        "text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);"
+                        "color: #90ee90; font-size: 50px; font-weight: bold;"
+                        "text-shadow: 0 0 10px rgba(0, 255, 0, 0.8);"  // 绿色阴影
                         "background-color: transparent; /* 透明背景 */"
                         "border: none;"
                     );
                 } else {
                     // 其他歌词：浅灰+稍大字体
-                    m_lyricLabels[i]->setStyleSheet("color: #DDDDDD; font-size: 16px;""background-color: transparent; /* 透明背景 */"
+                    m_lyricLabels[i]->setStyleSheet("color: #dcdcdc; font-size: 30px;""background-color: transparent; /* 透明背景 */"
                                                     "border: none;");
                 }
             }
@@ -782,10 +872,11 @@ void MainWindow::onVolumeSliderValueChanged(int value) {
 void MainWindow::initCoverDisplay() {
     // 创建封面标签
     m_coverLabel = new QLabel(this);
-    m_coverLabel->setFixedSize(1000,1000);  // 设置封面大小
+    m_coverLabel->setFixedSize(500,500);  // 设置封面大小
     m_coverLabel->setStyleSheet("border: 2px solid rgba(255, 255, 255, 0.3); "
                                "border-radius: 8px; "
-                               "background-color: rgba(0, 0, 0, 0.2);");
+                               "border: none;"
+                               "background-color: rgba(0, 0, 0, 0);");
     m_coverLabel->setAlignment(Qt::AlignCenter);
 
     // 加载默认封面（没有找到封面时显示）
@@ -907,7 +998,140 @@ void MainWindow::loadAlbumCover() {
     setCoverImage(cover);
 }
 
+void MainWindow::initSystemTray() {
+    // 创建系统托盘图标
+    m_systemTray = new QSystemTrayIcon(this);
+    m_systemTray->setIcon(QIcon(":/bofang.png")); // 设置托盘图标
+    m_systemTray->setToolTip("音乐播放器"); // 鼠标悬停提示
 
+    // 创建右键菜单
+    m_trayMenu = new QMenu(this);
+
+    // 添加菜单项
+    QAction *playAction = new QAction("播放/暂停", this);
+    QAction *nextAction = new QAction("下一首", this);
+    QAction *prevAction = new QAction("上一首", this);
+    QAction *showAction = new QAction("显示窗口", this);
+    QAction *quitAction = new QAction("退出", this);
+
+    // 关联信号槽
+    connect(playAction, &QAction::triggered, this, &MainWindow::handlePlaySlot);
+    connect(nextAction, &QAction::triggered, this, &MainWindow::handleNextSlot);
+    connect(prevAction, &QAction::triggered, this, &MainWindow::handlePrevSlot);
+    connect(showAction, &QAction::triggered, this, &MainWindow::showNormal);
+    connect(quitAction, &QAction::triggered, qApp, &QApplication::quit);
+
+    // 添加到菜单并设置给托盘
+    m_trayMenu->addAction(playAction);
+    m_trayMenu->addAction(nextAction);
+    m_trayMenu->addAction(prevAction);
+    m_trayMenu->addSeparator();
+    m_trayMenu->addAction(showAction);
+    m_trayMenu->addAction(quitAction);
+
+    m_systemTray->setContextMenu(m_trayMenu);
+
+    // 点击托盘图标显示/隐藏窗口
+    connect(m_systemTray, &QSystemTrayIcon::activated,
+            this, [this](QSystemTrayIcon::ActivationReason reason) {
+        if (reason == QSystemTrayIcon::Trigger) {
+            if (isVisible()) hide();
+            else showNormal();
+        }
+    });
+
+    // 显示托盘图标
+    m_systemTray->show();
+}
+
+// 添加发送通知的函数
+void MainWindow::showDesktopNotification(const QString &title, const QString &message) {
+    // 简单通知（Qt原生方法，在不同平台表现可能不同）
+    m_systemTray->showMessage(
+        title,
+        message,
+        QIcon(":/icon.png"),
+        1000 // 显示2秒
+    );
+}
+
+// 保存播放列表时，同时保存 musicDir
+void MainWindow::savePlayList() {
+    if (ui->musicList->count() == 0) return;
+
+    QString appDataPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    QDir().mkpath(appDataPath);
+    QString savePath = appDataPath + "/playlist.json";
+
+    // 构建JSON对象（包含musicDir和音乐列表）
+    QJsonObject rootObj;
+    rootObj["musicDir"] = musicDir; // 保存当前固定的musicDir
+
+    QJsonArray musicArray;
+    for (int i = 0; i < ui->musicList->count(); ++i) {
+        QString musicName = ui->musicList->item(i)->text();
+        QString fullFileName = m_fullFileNameMap.value(musicName);
+        QJsonObject musicObj;
+        musicObj["name"] = musicName;
+        musicObj["fileName"] = fullFileName; // 只存文件名（不含路径）
+        musicArray.append(musicObj);
+    }
+    rootObj["musicList"] = musicArray;
+
+    // 保存到文件
+    QFile file(savePath);
+    if (file.open(QIODevice::WriteOnly)) {
+        QJsonDocument doc(rootObj);
+        file.write(doc.toJson());
+        file.close();
+    }
+}
+
+// 加载播放列表时，恢复保存的musicDir
+void MainWindow::loadPlayList() {
+    QString appDataPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    QString savePath = appDataPath + "/playlist.json";
+
+    QFile file(savePath);
+    if (!file.exists() || !file.open(QIODevice::ReadOnly)) return;
+
+    QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
+    file.close();
+    if (!doc.isObject()) return;
+    QJsonObject rootObj = doc.object();
+
+    // 关键：恢复保存的musicDir（固定不变）
+    musicDir = rootObj["musicDir"].toString();
+    if (musicDir.isEmpty()) return; // 如果没有保存的路径，直接返回
+
+    QJsonArray musicArray = rootObj["musicList"].toArray();
+
+    ui->musicList->clear();
+    m_fullFileNameMap.clear();
+
+    // 加载列表数据（使用保存的musicDir）
+    for (int i = 0; i < musicArray.size(); ++i) {
+        QJsonObject musicObj = musicArray[i].toObject();
+        QString musicName = musicObj["name"].toString();
+        QString fullFileName = musicObj["fileName"].toString(); // 仅文件名
+
+        if (musicName.isEmpty() || fullFileName.isEmpty()) continue;
+
+        // 检查文件是否存在（确保在固定的musicDir下）
+        QString fullPath = musicDir + fullFileName;
+        if (!QFile::exists(fullPath)) {
+            qDebug() << "文件不存在：" << fullPath;
+            continue;
+        }
+
+        ui->musicList->addItem(musicName);
+        m_fullFileNameMap[musicName] = fullFileName; // 只存文件名
+    }
+
+    if (ui->musicList->count() > 0) {
+        ui->musicList->setCurrentRow(0);
+    }
+}
 
 
 // ------------------------------
@@ -918,4 +1142,17 @@ void MainWindow::loadAlbumCover() {
 void MainWindow::resizeEvent(QResizeEvent *event) {
     QMainWindow::resizeEvent(event);
 
+}
+
+// 重写closeEvent，实现关闭时最小化到托盘
+void MainWindow::closeEvent(QCloseEvent *event) {
+
+    // 关闭前保存播放列表
+    //保存上一次的歌单内容
+    savePlayList();
+
+    if (m_systemTray->isVisible()) {
+        hide(); // 隐藏窗口而不是关闭
+        event->ignore(); // 忽略关闭事件
+    }
 }

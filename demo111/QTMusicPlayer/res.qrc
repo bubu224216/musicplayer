@@ -31,5 +31,7 @@
         <file>bcakground.jpg</file>
         <file>add_to.png</file>
         <file>bk6.jpg</file>
+        <file>bk2.jpg</file>
+        <file>delete.png</file>
     </qresource>
 </RCC>

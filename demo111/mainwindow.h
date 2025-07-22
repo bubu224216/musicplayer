@@ -12,6 +12,7 @@
 #include <QFileDialog>
 #include <vector>
 #include <QTimer>
+#include<QSystemTrayIcon>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -100,6 +101,15 @@ private:
     QLabel *m_coverLabel;       // 封面显示标签
     QPixmap m_defaultCover;     // 默认封面图片
 
+    //放入系统托盘当中的代码
+    QSystemTrayIcon *m_systemTray;
+    QMenu *m_trayMenu;
+
+
+    // 播放列表持久化相关
+    void savePlayList();    // 保存播放列表
+    void loadPlayList();    // 加载播放列表
+
 private slots:
     // ===== 播放控制相关槽函数 =====
     void handlePlaySlot();               // 播放/暂停
@@ -120,8 +130,12 @@ private slots:
     void onVolumeSliderValueChanged(int k);//切换静音
 
     void onMediaStatusChanged(QMediaPlayer::MediaStatus status);  // 媒体状态变化槽函数
+    void initSystemTray();
+    void closeEvent(QCloseEvent* event);
 
+    void showDesktopNotification(const QString &title, const QString &message);
 
+    void handleDeleteMusicSlot();
 };
 
 #endif // MAINWINDOW_H
