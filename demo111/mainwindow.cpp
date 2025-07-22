@@ -113,14 +113,14 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // 5.1 歌词显示部件
     m_lyricWidget = new QWidget(this);
-    m_lyricWidget->setMinimumHeight(500);
+    m_lyricWidget->setMinimumHeight(300);
     m_lyricWidget->setMinimumWidth(900);
 
     m_lyricWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     m_lyricWidget->setStyleSheet("background-color: rgba(0, 0, 0, 0.3); border-radius: 5px;");
     m_lyricLayout = new QVBoxLayout(m_lyricWidget);
     m_lyricLayout->setAlignment(Qt::AlignCenter);
-    m_lyricLayout->setSpacing(10);
+    m_lyricLayout->setSpacing(1);
 
 
 
@@ -690,7 +690,7 @@ bool MainWindow::parseLyricFile(const QString& filePath){
 }
 
 // 加载当前歌曲的歌词
-void MainWindow::loadLyricForCurrentSong(){
+void MainWindow::loadLyricForCurrentSong() {
     qDeleteAll(m_lyricLabels);  // 清除旧歌词
     m_lyricLabels.clear();
     m_lyrics.clear();
@@ -713,6 +713,7 @@ void MainWindow::loadLyricForCurrentSong(){
         noLyricLabel->setAlignment(Qt::AlignCenter);
         m_lyricLabels.append(noLyricLabel);
         m_lyricLayout->addWidget(noLyricLabel);
+        noLyricLabel->hide(); // 初始隐藏
         m_currentLyricFile = "";
         return;
     }
@@ -722,18 +723,26 @@ void MainWindow::loadLyricForCurrentSong(){
     if (parseLyricFile(lyricFilePath)) {
         for (const Lyric& lyric : m_lyrics) {
             QLabel* label = new QLabel(lyric.content, m_lyricWidget);
-            label->setStyleSheet("color: #CCCCCC; font-size: 14px;");
+            // 设置透明背景（关键修改）
+            label->setStyleSheet("color: #CCCCCC; font-size: 14px;"
+                                "background-color: transparent;  /* 背景透明 */"
+                                "border: none;");  /* 无边框 */
             label->setAlignment(Qt::AlignCenter);
             m_lyricLabels.append(label);
             m_lyricLayout->addWidget(label);
+            label->hide(); // 初始隐藏
         }
         updateLyricDisplay();  // 初始显示
     } else {
         QLabel* errorLabel = new QLabel("歌词文件解析失败", m_lyricWidget);
-        errorLabel->setStyleSheet("color: #CCCCCC; font-size: 14px;");
+        // 错误提示Label也设置透明
+        errorLabel->setStyleSheet("color: #CCCCCC; font-size: 14px;"
+                                 "background-color: transparent;"
+                                 "border: none;");
         errorLabel->setAlignment(Qt::AlignCenter);
         m_lyricLabels.append(errorLabel);
         m_lyricLayout->addWidget(errorLabel);
+        errorLabel->hide(); // 初始隐藏
     }
 }
 
@@ -741,44 +750,41 @@ void MainWindow::loadLyricForCurrentSong(){
 void MainWindow::updateLyricDisplay(){
     if (m_lyricLabels.isEmpty() || m_currentLyricIndex < 0) return;
 
-    // 逐个设置歌词样式（当前句高亮）
-    for (int i = 0; i < m_lyricLabels.size(); ++i) {
-        if (i == m_currentLyricIndex) {
-            // 当前歌词：白色加粗+放大+阴影
-            m_lyricLabels[i]->setStyleSheet(
-                "color: #FFFFFF; font-size: 20px; font-weight: bold;"
-                "text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);"
-            );
-            // 缩放动画
-            QPropertyAnimation* animation = new QPropertyAnimation(m_lyricLabels[i], "geometry");
-            animation->setDuration(300);
-            animation->setStartValue(m_lyricLabels[i]->geometry());
-            QRect endRect = m_lyricLabels[i]->geometry();
-            endRect.setWidth(endRect.width() * 1.1);
-            endRect.setHeight(endRect.height() * 1.1);
-            endRect.moveLeft(endRect.left() - endRect.width() * 0.05);
-            endRect.moveTop(endRect.top() - endRect.height() * 0.05);
-            animation->setEndValue(endRect);
-            animation->setEasingCurve(QEasingCurve::OutQuad);
-            animation->start(QAbstractAnimation::DeleteWhenStopped);
-        } else if (qAbs(i - m_currentLyricIndex) <= 1) {
-            // 相邻歌词：浅灰+稍大字体
-            m_lyricLabels[i]->setStyleSheet("color: #DDDDDD; font-size: 16px;");
-        } else {
-            // 其他歌词：深灰+小字体
-            m_lyricLabels[i]->setStyleSheet("color: #888888; font-size: 14px;");
+    // 隐藏所有歌词标签
+        for (QLabel* label : m_lyricLabels) {
+            label->hide();
         }
-    }
 
-    // 滚动到当前歌词（居中显示）
-    if (m_currentLyricIndex < m_lyricLabels.size()) {
-        m_lyricWidget->scroll(0, m_lyricLabels[m_currentLyricIndex]->y() -
-                            m_lyricWidget->height()/2 +
-                            m_lyricLabels[m_currentLyricIndex]->height()/2);
-    }
+        // 显示当前歌词及其前后各一到两句歌词
+        int startIndex = qMax(0, m_currentLyricIndex - 1);
+        int endIndex = qMin(m_lyricLabels.size() - 1, m_currentLyricIndex + 1);
+
+        for (int i = startIndex; i <= endIndex; ++i) {
+            if (i < m_lyricLabels.size()) {
+                m_lyricLabels[i]->show();
+                if (i == m_currentLyricIndex) {
+                    // 当前歌词：白色加粗+放大+阴影
+                    m_lyricLabels[i]->setStyleSheet(
+                        "color: #FFFFFF; font-size: 20px; font-weight: bold;"
+                        "text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);"
+                        "background-color: transparent; /* 透明背景 */"
+                        "border: none;"
+                    );
+                } else {
+                    // 其他歌词：浅灰+稍大字体
+                    m_lyricLabels[i]->setStyleSheet("color: #DDDDDD; font-size: 16px;""background-color: transparent; /* 透明背景 */"
+                                                    "border: none;");
+                }
+            }
+        }
+
+        // 滚动到当前歌词（居中显示）
+        if (m_currentLyricIndex < m_lyricLabels.size()) {
+            m_lyricWidget->scroll(0, m_lyricLabels[m_currentLyricIndex]->y() -
+                                m_lyricWidget->height()/2 +
+                                m_lyricLabels[m_currentLyricIndex]->height()/2);
+        }
 }
-
-
 
 // 添加新的槽函数
 void MainWindow::onVolumeSliderValueChanged(int value) {
