@@ -11,6 +11,7 @@
 #include <QVBoxLayout>
 #include <QFileDialog>
 #include <vector>
+#include <QTimer>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -59,6 +60,7 @@ private:
     void loadLyricForCurrentSong();
     void updateLyricDisplay();
 
+//    void resizeEvent1(QResizeEvent *event);
     // ===== 成员变量 =====
     QMediaPlayer* m_player;              // 音乐播放器
     PLAYMODE m_mode;                     // 当前播放模式
@@ -83,6 +85,11 @@ private:
     int m_currentLyricIndex;
     QString m_currentLyricFile;
 
+    // 添加音量弹出滑块相关
+    QWidget* m_volumePopup = nullptr;
+    QSlider* m_volumeSlider = nullptr;
+    QTimer* m_hideVolumeTimer = nullptr;
+
 private slots:
     // ===== 播放控制相关槽函数 =====
     void handlePlaySlot();               // 播放/暂停
@@ -100,6 +107,10 @@ private slots:
     void setPosition(int position);             // 设置播放位置
     void handleProgressSliderPressed();         // 拖动开始
     void handleProgressSliderReleased();        // 拖动释放
+    void onVolumeSliderValueChanged(int k);//切换静音
+
+    void updateLyricHeight();
+
 };
 
 #endif // MAINWINDOW_H

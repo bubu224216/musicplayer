@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+// 头文件集中放在最上方，按Qt库→标准库→自定义逻辑排序
 #include <QIcon>
 #include <QSize>
 #include <QHBoxLayout>
@@ -15,14 +16,15 @@
 #include <QStyle>
 #include <QResizeEvent>
 #include <QDebug>
-#include <time.h>
-#include <vector>
 #include <QToolBar>
-#include <algorithm>
 #include <QPropertyAnimation>
 #include <QFileDialog>
+#include <time.h>
+#include <vector>
+#include <algorithm>
 
-// 构造函数：初始化界面布局与组件
+
+// 构造函数：按"基础初始化→组件创建→布局组装→信号连接"分步实现
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     m_mode(LIST_MODE),
@@ -32,44 +34,46 @@ MainWindow::MainWindow(QWidget *parent) :
     m_sliderPressed(false),
     m_currentLyricIndex(-1)
 {
+    // 第一步：基础初始化（窗口属性、核心组件）
     ui->setupUi(this);
     resize(1680, 1000);
     setWindowTitle("音乐播放器");
+    m_player = new QMediaPlayer(this);  // 播放器核心组件
 
-
-    // 初始化播放器核心组件
-    m_player = new QMediaPlayer(this);
+    // 主布局容器初始化
     QWidget *centralWidget = new QWidget(this);
     setCentralWidget(centralWidget);
     QVBoxLayout *mainLayout = new QVBoxLayout(centralWidget);
     mainLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->setSpacing(0);
 
-    // 工具栏设置
+
+    // 第二步：创建工具栏（快捷操作区）
     QToolBar *toolBar = addToolBar("工具栏");
     toolBar->setMovable(false);
     toolBar->setStyleSheet("QToolBar { background: transparent; border: none; }");
+    // 工具栏右侧对齐（通过拉伸部件实现）
     QWidget *spacer = new QWidget(this);
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     toolBar->addWidget(spacer);
-    QAction *addMusicAction = new QAction(QIcon(":/res/add_to.png"), "添加音乐", this);
-    QAction *changeThemeAction = new QAction(QIcon(":/res/theme.png"), "更换主题", this);
+    // 工具栏按钮
+    QAction *addMusicAction = new QAction(QIcon(":/add_to.png"), "添加音乐", this);
+    QAction *changeThemeAction = new QAction(QIcon(":/theme.png"), "更换主题", this);
     toolBar->addAction(addMusicAction);
     toolBar->addAction(changeThemeAction);
+    // 工具栏信号连接（提前连接，避免分散）
     connect(addMusicAction, &QAction::triggered, this, &MainWindow::handleAddMusicSlot);
     connect(changeThemeAction, &QAction::triggered, this, &MainWindow::handleChangeBackgroundSlot);
 
-    // 分割器布局（左侧列表+右侧播放区）
-    QSplitter *splitter = new QSplitter(Qt::Horizontal, this);
-    splitter->setHandleWidth(1);
-    splitter->setChildrenCollapsible(false);
-    splitter->setHandleWidth(0);
 
-    // 左侧音乐列表
+
+
+    // 第四步：左侧音乐列表区
     QWidget *listWidget = new QWidget(this);
     QVBoxLayout *listLayout = new QVBoxLayout(listWidget);
     listLayout->setContentsMargins(0, 0, 0, 0);
     listLayout->setSpacing(0);
+    // 列表样式
     ui->musicList->setStyleSheet("QListWidget {"
                                  "    background: transparent;"
                                  "    border: none;"
@@ -84,28 +88,77 @@ MainWindow::MainWindow(QWidget *parent) :
                                  "    color: #004085;"
                                  "}");
     listLayout->addWidget(ui->musicList);
-    m_listWidget = listWidget;
+    m_listWidget = listWidget;  // 保存列表容器引用
 
-    // 右侧播放控制区
+
+
+    // 第五步：右侧播放控制区（垂直布局）
     QWidget *playerWidget = new QWidget(this);
-    QVBoxLayout *playerLayout = new QVBoxLayout(playerWidget);
+    QHBoxLayout *playerLayout = new QHBoxLayout(playerWidget);
     playerLayout->setContentsMargins(10, 10, 10, 10);
     playerLayout->setSpacing(10);
 
-    // 歌词显示部件
+    //调整结构为上下结构
+    QWidget *topWidget = new QWidget(this);
+    QHBoxLayout *topLayout = new QHBoxLayout(topWidget);
+    topLayout->setContentsMargins(0, 0, 0, 0);
+    topLayout->setSpacing(0);
+    topLayout->addWidget(listWidget);  // 左侧音乐列表
+//    topLayout->addStretch();           // 右侧空白或封面等
+
+    // 设置 topWidget 的尺寸策略，避免无限扩展
+    topWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+
+    mainLayout->addWidget(topWidget); // 添加上半部分（列表）
+//    mainLayout->addStretch();  // 移除这行，避免布局无限扩展
+    mainLayout->addWidget(playerWidget);   // 播放区统一置底
+
+
+    // 5.1 歌词显示部件
     m_lyricWidget = new QWidget(this);
-    m_lyricWidget->setMinimumHeight(200);
+    m_lyricWidget->setMinimumHeight(500);
+    m_lyricWidget->setMinimumWidth(900);
+    m_lyricWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     m_lyricWidget->setStyleSheet("background-color: rgba(0, 0, 0, 0.3); border-radius: 5px;");
     m_lyricLayout = new QVBoxLayout(m_lyricWidget);
     m_lyricLayout->setAlignment(Qt::AlignCenter);
     m_lyricLayout->setSpacing(10);
-    playerLayout->addWidget(m_lyricWidget);
 
-    // 进度条布局
+    // 歌曲封面
+    QWidget *cover = new QWidget;
+    cover->setFixedSize(300, 300);  // 设置固定大小，根据需要调整
+
+    // 创建布局
+    QVBoxLayout *coverLayout = new QVBoxLayout(cover);
+    coverLayout->setContentsMargins(0, 0, 0, 0);  // 移除边距
+    coverLayout->addStretch();
+
+    // 使用 QPalette 设置背景图片
+    QPixmap background(":/bk6.jpg");  // 替换为你的图片路径
+    QPalette palette;
+    palette.setBrush(cover->backgroundRole(), QBrush(background.scaled(
+        cover->size(),                // 缩放尺寸
+        Qt::KeepAspectRatioByExpanding,  // 保持比例并填充
+        Qt::SmoothTransformation       // 平滑缩放
+    )));
+    cover->setPalette(palette);
+    cover->setAutoFillBackground(true);  // 启用自动填充背景
+    m_lyricLayout->addWidget(cover);
+
+    // 添加歌词区域的拉伸项，确保封面在顶部
+    m_lyricLayout->addStretch();
+
+    topLayout->addWidget(m_lyricWidget);  // 添加到右侧布局
+    // 设置歌词组件的拉伸因子，避免无限扩展
+    topLayout->setStretchFactor(m_lyricWidget, 1);
+
+
+    // 5.2 进度条布局（水平）
     QHBoxLayout *progressLayout = new QHBoxLayout();
     m_progressSlider = ui->progressSlider;
     m_currentTimeLabel = ui->currentTimeLabel;
     m_totalTimeLabel = ui->totalTimeLabel;
+    // 进度条样式
     m_progressSlider->setStyleSheet("QSlider::groove:horizontal {"
                                   "    border: 1px solid #999999;"
                                   "    height: 8px;"
@@ -123,11 +176,12 @@ MainWindow::MainWindow(QWidget *parent) :
     progressLayout->addWidget(m_progressSlider);
     progressLayout->addWidget(m_totalTimeLabel);
 
-    // 按钮控制区
+    // 5.3 按钮控制区（水平）
     QWidget *buttonContainer = new QWidget(this);
     QHBoxLayout *buttonLayout = new QHBoxLayout(buttonContainer);
     buttonLayout->setSpacing(20);
     buttonLayout->setContentsMargins(20, 10, 20, 20);
+    // 按钮布局（添加拉伸使按钮居中）
     buttonLayout->addStretch();
     buttonLayout->addWidget(ui->preBtn);
     buttonLayout->addStretch();
@@ -142,8 +196,9 @@ MainWindow::MainWindow(QWidget *parent) :
     buttonLayout->addWidget(ui->togglelistBtn);
     buttonLayout->addStretch();
 
-    // 控制面板样式
+    // 5.4 控制面板（包含进度条+按钮区）
     QWidget *controlPanel = new QWidget(this);
+    controlPanel->setFixedHeight(200);
     controlPanel->setStyleSheet(R"(
         QWidget {
             background-color: rgba(255, 255, 255, 200);
@@ -154,46 +209,81 @@ MainWindow::MainWindow(QWidget *parent) :
     QVBoxLayout *controlLayout = new QVBoxLayout(controlPanel);
     controlLayout->setContentsMargins(15, 10, 15, 10);
     controlLayout->setSpacing(10);
-    controlLayout->addLayout(progressLayout);
-    controlLayout->addWidget(buttonContainer);
-    playerLayout->addStretch();
+    controlLayout->addLayout(progressLayout);  // 进度条
+    controlLayout->addWidget(buttonContainer);  // 按钮区
+    // 添加到右侧布局（歌词区下方）
+//    playerLayout->addStretch();  // 歌词与控制区间的空白
     playerLayout->addWidget(controlPanel);
 
-    // 组装布局
-    splitter->addWidget(listWidget);
-    splitter->addWidget(playerWidget);
-    splitter->setSizes(QList<int>() << 200 << 400);
-    mainLayout->addWidget(splitter);
-    setBackGround(":/res/bcakground.jpg");
+    // 设置 playerWidget 的尺寸策略，确保高度固定
+    playerWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
-    // 初始化按钮与信号连接
-    initButtons();
-    srand(time(NULL));
+    setBackGround(":/bcakground.jpg");  // 设置背景
 
-    // 播放结束自动切歌
+
+    // 第七步：初始化与信号连接
+    initButtons();  // 按钮样式与信号
+    srand(time(NULL));  // 随机数种子（用于随机播放）
+
+
+    // 创建音量滑块弹出窗口
+     m_volumePopup = new QWidget(this, Qt::Popup);  // 设置为弹出式窗口
+     m_volumePopup->setStyleSheet("QWidget { background: rgba(255, 255, 255, 230); border: 1px solid #ccc; border-radius: 8px; }");
+
+     QVBoxLayout* volumeLayout = new QVBoxLayout(m_volumePopup);
+     volumeLayout->setContentsMargins(10, 10, 10, 10);
+
+     m_volumeSlider = new QSlider(Qt::Vertical, m_volumePopup);
+     m_volumeSlider->setRange(0, 100);
+     m_volumeSlider->setValue(m_player->volume());  // 初始设置为当前音量
+
+     m_volumeSlider->setStyleSheet(R"(
+         QSlider::groove:vertical {
+             background: #ccc; /* 轨道背景色 */
+             width: 6px;
+             border-radius: 3px;
+         }
+         QSlider::handle:vertical {
+             background: #0099FF; /* 滑块按钮背景色 */
+             height: 16px;
+             margin: 0 -6px; /* 使滑块超出轨道宽度 */
+             border-radius: 8px;
+         }
+     )");
+     volumeLayout->addWidget(m_volumeSlider);
+
+     // 控制播放器音量
+     connect(m_volumeSlider, &QSlider::valueChanged, m_player, &QMediaPlayer::setVolume);
+
+     //音量为0
+        connect(m_volumeSlider, &QSlider::valueChanged, this, &MainWindow::onVolumeSliderValueChanged);
+    // 播放结束自动切歌信号
     connect(m_player, &QMediaPlayer::stateChanged, this, [=](QMediaPlayer::State state) {
         if (state == QMediaPlayer::StoppedState && ui->musicList->count() > 0 && !m_isManualSwitch) {
             handleNextSlot();
         }
     });
+    // 进度与时长更新信号
     connect(m_player, &QMediaPlayer::positionChanged, this, &MainWindow::updateProgress);
     connect(m_player, &QMediaPlayer::durationChanged, this, &MainWindow::updateDuration);
+    // 进度条交互信号
     connect(m_progressSlider, &QSlider::sliderMoved, this, &MainWindow::setPosition);
     connect(m_progressSlider, &QSlider::sliderPressed, this, &MainWindow::handleProgressSliderPressed);
     connect(m_progressSlider, &QSlider::sliderReleased, this, &MainWindow::handleProgressSliderReleased);
 }
 
-// 析构函数：释放UI资源
+
+// 析构函数（放在构造函数之后）
 MainWindow::~MainWindow() {
     delete ui;
 }
 
 
 // ------------------------------
-// 一、播放控制相关槽函数
+// 一、播放控制核心槽函数（最常用功能优先）
 // ------------------------------
 
-// 播放/暂停按钮：切换播放状态并更新图标
+// 播放/暂停切换
 void MainWindow::handlePlaySlot(){
     if (ui->musicList->count() == 0) return;
 
@@ -206,14 +296,14 @@ void MainWindow::handlePlaySlot(){
 
     if (m_player->state() == QMediaPlayer::PlayingState) {
         m_player->pause();
-        ui->playBtn->setIcon(QIcon(":/res/play.png"));
+        ui->playBtn->setIcon(QIcon(":/bofang.png"));
     } else {
         m_player->play();
-        ui->playBtn->setIcon(QIcon(":/res/pause.png"));
+        ui->playBtn->setIcon(QIcon(":/pause.png"));
     }
 }
 
-// 下一首按钮：根据播放模式切换到下一首
+// 下一首
 void MainWindow::handleNextSlot(){
     int count = ui->musicList->count();
     if (count <= 0) return;
@@ -239,7 +329,7 @@ void MainWindow::handleNextSlot(){
     m_isManualSwitch = false;
 }
 
-// 上一首按钮：根据播放模式切换到上一首
+// 上一首
 void MainWindow::handlePrevSlot(){
     int count = ui->musicList->count();
     if (count <= 0) return;
@@ -269,12 +359,12 @@ void MainWindow::handlePrevSlot(){
     m_isManualSwitch = false;
 }
 
-// 列表项点击：播放选中的音乐
+// 列表项点击播放
 void MainWindow::handleMusicListItemClicked(QListWidgetItem *item){
     m_isManualSwitch = true;
     int row = ui->musicList->row(item);
 
-    // 更新随机模式索引
+    // 随机模式下更新索引
     if (m_mode == RANDOM_MODE) {
         for (int i = 0; i < m_shuffleList.size(); ++i) {
             if (m_shuffleList[i] == row) {
@@ -294,8 +384,11 @@ void MainWindow::handleMusicListItemClicked(QListWidgetItem *item){
 
     m_player->setMedia(QUrl::fromLocalFile(musicDir + fullFileName));
     m_player->play();
-    ui->playBtn->setIcon(QIcon(":/res/pause.png"));
+    ui->playBtn->setIcon(QIcon(":/pause.png"));
     m_isManualSwitch = false;
+
+    // 加载歌词
+    loadLyricForCurrentSong();
 }
 
 
@@ -303,33 +396,33 @@ void MainWindow::handleMusicListItemClicked(QListWidgetItem *item){
 // 二、模式与界面控制槽函数
 // ------------------------------
 
-// 播放模式切换：循环切换列表/随机/单曲模式
+// 播放模式切换（列表/随机/单曲）
 void MainWindow::handleModeSlot(){
     m_mode = static_cast<PLAYMODE>((m_mode + 1) % 3);
     if (m_mode == RANDOM_MODE) shufflePlayList();
 
     switch(m_mode) {
         case LIST_MODE:
-            ui->modeBtn->setIcon(QIcon(":/res/list.png"));
+            ui->modeBtn->setIcon(QIcon(":/shunxubofang.png"));
             qDebug() << "列表循环模式";
             break;
         case RANDOM_MODE:
-            ui->modeBtn->setIcon(QIcon(":/res/random.png"));
+            ui->modeBtn->setIcon(QIcon(":/suijibofang.png"));
             qDebug() << "随机播放模式";
             break;
         case SINGLE_MODE:
-            ui->modeBtn->setIcon(QIcon(":/res/single.png"));
+            ui->modeBtn->setIcon(QIcon(":/single.png"));
             qDebug() << "单曲循环模式";
             break;
     }
 }
 
-// 切换列表显示：隐藏/显示左侧音乐列表
+// 切换左侧列表显示/隐藏
 void MainWindow::handleToggleListSlot(){
     m_listWidget->setVisible(!m_listWidget->isVisible());
 }
 
-// 更换背景：打开文件选择对话框设置新背景
+// 更换背景图片
 void MainWindow::handleChangeBackgroundSlot(){
     QString filePath = QFileDialog::getOpenFileName(
         this, "选择背景图片", QDir::homePath(),
@@ -342,10 +435,10 @@ void MainWindow::handleChangeBackgroundSlot(){
 
 
 // ------------------------------
-// 三、音乐管理相关槽函数
+// 三、音乐管理槽函数
 // ------------------------------
 
-// 添加音乐：打开文件选择对话框添加音乐文件
+// 添加音乐文件
 void MainWindow::handleAddMusicSlot(){
     QStringList filePaths = QFileDialog::getOpenFileNames(
         this, "选择音乐文件", QDir::homePath(),
@@ -354,13 +447,13 @@ void MainWindow::handleAddMusicSlot(){
 
     if (filePaths.isEmpty()) return;
 
-    // 初始化音乐目录
+    // 初始化音乐目录（首次添加时）
     if (musicDir.isEmpty()) {
         QFileInfo firstFile(filePaths.first());
         musicDir = firstFile.absolutePath() + "/";
     }
 
-    // 添加文件到列表（去重）
+    // 去重添加到列表
     for (const QString& filePath : filePaths) {
         QFileInfo fileInfo(filePath);
         QString suffix = fileInfo.suffix().toLower();
@@ -390,21 +483,21 @@ void MainWindow::handleAddMusicSlot(){
 
 
 // ------------------------------
-// 四、进度条与歌词相关槽函数
+// 四、进度条与歌词槽函数
 // ------------------------------
 
-// 进度条拖动开始：标记手动拖动状态
+// 进度条拖动开始
 void MainWindow::handleProgressSliderPressed(){
     m_sliderPressed = true;
 }
 
-// 进度条拖动结束：更新播放进度
+// 进度条拖动结束（更新播放位置）
 void MainWindow::handleProgressSliderReleased(){
     m_sliderPressed = false;
     setPosition(m_progressSlider->value());
 }
 
-// 设置播放位置：更新播放器当前播放进度
+// 设置播放位置
 void MainWindow::setPosition(int position){
     if (!m_sliderPressed) {
         m_player->setPosition(position);
@@ -412,7 +505,7 @@ void MainWindow::setPosition(int position){
     }
 }
 
-// 更新进度：随播放进度更新进度条与时间显示
+// 更新进度（随播放实时更新）
 void MainWindow::updateProgress(qint64 position){
     if (!m_sliderPressed && m_player->duration() > 0) {
         m_progressSlider->setValue(position);
@@ -433,7 +526,7 @@ void MainWindow::updateProgress(qint64 position){
     }
 }
 
-// 更新总时长：音乐加载完成后更新总时长显示
+// 更新总时长（音乐加载后）
 void MainWindow::updateDuration(qint64 duration){
     m_progressSlider->setRange(0, duration);
     m_totalTimeLabel->setText(formatTime(duration));
@@ -441,12 +534,12 @@ void MainWindow::updateDuration(qint64 duration){
 
 
 // ------------------------------
-// 辅助函数
+// 五、基础辅助函数
 // ------------------------------
 
-// 初始化按钮样式与信号连接
+// 初始化按钮样式与信号
 void MainWindow::initButtons(){
-    // 设置按钮样式
+    // 按钮样式设置（lambda复用）
     auto setBtnStyle = [&](QAbstractButton* btn, const QString& icon) {
         btn->setFixedSize(80, 80);
         btn->setIconSize(QSize(80, 80));
@@ -461,20 +554,28 @@ void MainWindow::initButtons(){
                           "    border-radius: 5px;"
                           "}");
     };
-    setBtnStyle(ui->preBtn, ":/res/previous.png");
-    setBtnStyle(ui->playBtn, ":/res/play.png");
-    setBtnStyle(ui->nextBtn, ":/res/next.png");
-    setBtnStyle(ui->modeBtn, ":/res/list.png");
-    setBtnStyle(ui->soundBtn, ":/res/sound.png");
-    setBtnStyle(ui->togglelistBtn, ":/res/playlist.png");
+    // 逐个设置按钮
+    setBtnStyle(ui->preBtn, ":/previous.png");
+    setBtnStyle(ui->playBtn, ":/bofang.png");
+    setBtnStyle(ui->nextBtn, ":/next.png");
+    setBtnStyle(ui->modeBtn, ":/shunxubofang.png");
+    setBtnStyle(ui->soundBtn, ":/sound.png");
+    setBtnStyle(ui->togglelistBtn, ":/playlist.png");
 
-    // 连接按钮信号
+    // 按钮信号连接
     connect(ui->playBtn, &QPushButton::clicked, this, &MainWindow::handlePlaySlot);
     connect(ui->modeBtn, &QPushButton::clicked, this, &MainWindow::handleModeSlot);
     connect(ui->nextBtn, &QPushButton::clicked, this, &MainWindow::handleNextSlot);
     connect(ui->preBtn, &QPushButton::clicked, this, &MainWindow::handlePrevSlot);
     connect(ui->togglelistBtn, &QPushButton::clicked, this, &MainWindow::handleToggleListSlot);
     connect(ui->musicList, &QListWidget::itemClicked, this, &MainWindow::handleMusicListItemClicked);
+
+    connect(ui->soundBtn, &QPushButton::clicked, this, [=]() {
+            // 设置弹出滑块位置（在按钮右上角）
+            QPoint btnPos = ui->soundBtn->mapToGlobal(QPoint(0, 0));
+            m_volumePopup->move(btnPos.x() + ui->soundBtn->width() + 5, btnPos.y());
+            m_volumePopup->show();
+        });
 }
 
 // 设置背景图片
@@ -482,33 +583,10 @@ void MainWindow::setBackGround(const QString &filename){
     setStyleSheet(QString("MainWindow { border-image: url(%1) 0 0 0 0 stretch stretch; }").arg(filename));
 }
 
-// 格式化时间（毫秒转分:秒）
+// 时间格式化（毫秒→分:秒）
 QString MainWindow::formatTime(qint64 timeMilliSeconds){
     qint64 seconds = timeMilliSeconds / 1000;
     return QString("%1:%2").arg(seconds/60, 2, 10, QChar('0')).arg(seconds%60, 2, 10, QChar('0'));
-}
-
-// 开始播放音乐
-void MainWindow::startPlayMusic(){
-    if (!ui->musicList->currentItem()) return;
-
-    QString musicName = ui->musicList->currentItem()->text();
-    QString fullFileName = m_fullFileNameMap.value(musicName);
-    if (fullFileName.isEmpty()) {
-        QMessageBox::warning(this, "错误", "未找到音乐文件：" + musicName);
-        return;
-    }
-
-    QString Abs = musicDir + fullFileName;
-    m_player->setMedia(QUrl::fromLocalFile(Abs));
-    m_player->play();
-    ui->playBtn->setIcon(QIcon(":/res/pause.png"));
-
-    // 重置进度与歌词
-    m_progressSlider->setValue(0);
-    m_currentTimeLabel->setText("00:00");
-    m_totalTimeLabel->setText("00:00");
-    loadLyricForCurrentSong();
 }
 
 // 加载指定目录音乐
@@ -531,12 +609,41 @@ void MainWindow::loadAppointMusicDir(const QString& filepath){
     if(ui->musicList->count() > 0) ui->musicList->setCurrentRow(0);
 }
 
+
+// ------------------------------
+// 六、播放相关辅助函数
+// ------------------------------
+
+// 开始播放音乐
+void MainWindow::startPlayMusic(){
+    if (!ui->musicList->currentItem()) return;
+
+    QString musicName = ui->musicList->currentItem()->text();
+    QString fullFileName = m_fullFileNameMap.value(musicName);
+    if (fullFileName.isEmpty()) {
+        QMessageBox::warning(this, "错误", "未找到音乐文件：" + musicName);
+        return;
+    }
+
+    QString Abs = musicDir + fullFileName;
+    m_player->setMedia(QUrl::fromLocalFile(Abs));
+    m_player->play();
+    ui->playBtn->setIcon(QIcon(":/pause.png"));
+
+    // 重置进度与歌词
+    m_progressSlider->setValue(0);
+    m_currentTimeLabel->setText("00:00");
+    m_totalTimeLabel->setText("00:00");
+    loadLyricForCurrentSong();
+}
+
 // 生成随机播放列表
 void MainWindow::shufflePlayList(){
     m_shuffleList.clear();
     int count = ui->musicList->count();
     if (count <= 0) return;
 
+    // 填充索引并打乱
     for (int i = 0; i < count; ++i) m_shuffleList.push_back(i);
     for (int i = count - 1; i > 0; --i) {
         int j = rand() % (i + 1);
@@ -547,10 +654,10 @@ void MainWindow::shufflePlayList(){
 
 
 // ------------------------------
-// 歌词相关辅助函数
+// 七、歌词相关辅助函数
 // ------------------------------
 
-// 解析歌词文件
+// 解析歌词文件（.lrc）
 bool MainWindow::parseLyricFile(const QString& filePath){
     m_lyrics.clear();
     QFile file(filePath);
@@ -558,16 +665,18 @@ bool MainWindow::parseLyricFile(const QString& filePath){
 
     QTextStream in(&file);
     in.setCodec("UTF-8");
-    QRegExp regExp("\\[(\\d+):(\\d+).(\\d+)\\](.*)");
+    QRegExp regExp("\\[(\\d+):(\\d+).(\\d+)\\](.*)");  // 匹配[分:秒.毫秒]歌词
 
     while (!in.atEnd()) {
         QString line = in.readLine().trimmed();
         if (regExp.indexIn(line) != -1) {
+            // 解析时间（转换为毫秒）
             int minute = regExp.cap(1).toInt();
             int second = regExp.cap(2).toInt();
             int msec = regExp.cap(3).toInt() * 10;
             qint64 totalMsec = minute * 60 * 1000 + second * 1000 + msec;
 
+            // 保存歌词
             Lyric lyric;
             lyric.time = totalMsec;
             lyric.content = regExp.cap(4).trimmed();
@@ -575,20 +684,22 @@ bool MainWindow::parseLyricFile(const QString& filePath){
         }
     }
 
+    // 按时间排序
     std::sort(m_lyrics.begin(), m_lyrics.end(), [](const Lyric& a, const Lyric& b) { return a.time < b.time; });
     file.close();
     return true;
 }
 
-// 加载当前歌曲歌词
+// 加载当前歌曲的歌词
 void MainWindow::loadLyricForCurrentSong(){
-    qDeleteAll(m_lyricLabels);
+    qDeleteAll(m_lyricLabels);  // 清除旧歌词
     m_lyricLabels.clear();
     m_lyrics.clear();
     m_currentLyricIndex = -1;
 
     if (!ui->musicList->currentItem()) return;
 
+    // 获取歌词文件路径（与音乐同目录，同名.lrc）
     QString musicName = ui->musicList->currentItem()->text();
     QString fullFileName = m_fullFileNameMap.value(musicName);
     if (fullFileName.isEmpty()) return;
@@ -596,6 +707,7 @@ void MainWindow::loadLyricForCurrentSong(){
     QString musicFilePath = musicDir + fullFileName;
     QString lyricFilePath = musicFilePath.left(musicFilePath.lastIndexOf('.')) + ".lrc";
 
+    // 无歌词文件时显示提示
     if (!QFile::exists(lyricFilePath)) {
         QLabel* noLyricLabel = new QLabel("未找到歌词文件", m_lyricWidget);
         noLyricLabel->setStyleSheet("color: #CCCCCC; font-size: 14px;");
@@ -606,6 +718,7 @@ void MainWindow::loadLyricForCurrentSong(){
         return;
     }
 
+    // 解析并显示歌词
     m_currentLyricFile = lyricFilePath;
     if (parseLyricFile(lyricFilePath)) {
         for (const Lyric& lyric : m_lyrics) {
@@ -615,7 +728,7 @@ void MainWindow::loadLyricForCurrentSong(){
             m_lyricLabels.append(label);
             m_lyricLayout->addWidget(label);
         }
-        updateLyricDisplay();
+        updateLyricDisplay();  // 初始显示
     } else {
         QLabel* errorLabel = new QLabel("歌词文件解析失败", m_lyricWidget);
         errorLabel->setStyleSheet("color: #CCCCCC; font-size: 14px;");
@@ -625,12 +738,14 @@ void MainWindow::loadLyricForCurrentSong(){
     }
 }
 
-// 更新歌词显示（高亮当前歌词并滚动）
+// 更新歌词显示（高亮当前句+滚动）
 void MainWindow::updateLyricDisplay(){
     if (m_lyricLabels.isEmpty() || m_currentLyricIndex < 0) return;
 
+    // 逐个设置歌词样式（当前句高亮）
     for (int i = 0; i < m_lyricLabels.size(); ++i) {
         if (i == m_currentLyricIndex) {
+            // 当前歌词：白色加粗+放大+阴影
             m_lyricLabels[i]->setStyleSheet(
                 "color: #FFFFFF; font-size: 20px; font-weight: bold;"
                 "text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);"
@@ -648,19 +763,57 @@ void MainWindow::updateLyricDisplay(){
             animation->setEasingCurve(QEasingCurve::OutQuad);
             animation->start(QAbstractAnimation::DeleteWhenStopped);
         } else if (qAbs(i - m_currentLyricIndex) <= 1) {
+            // 相邻歌词：浅灰+稍大字体
             m_lyricLabels[i]->setStyleSheet("color: #DDDDDD; font-size: 16px;");
         } else {
+            // 其他歌词：深灰+小字体
             m_lyricLabels[i]->setStyleSheet("color: #888888; font-size: 14px;");
         }
     }
 
-    // 滚动到当前歌词
+    // 滚动到当前歌词（居中显示）
     if (m_currentLyricIndex < m_lyricLabels.size()) {
         m_lyricWidget->scroll(0, m_lyricLabels[m_currentLyricIndex]->y() -
                             m_lyricWidget->height()/2 +
                             m_lyricLabels[m_currentLyricIndex]->height()/2);
     }
 }
+
+
+// 添加新的槽函数
+void MainWindow::onVolumeSliderValueChanged(int value) {
+    m_player->setVolume(value);  // 设置播放器音量
+    // 检查音量是否为0
+    if (value == 0) {
+        ui->soundBtn->setIcon(QIcon(":/jingyin.png"));  // 设置为静音图标
+    } else {
+        ui->soundBtn->setIcon(QIcon(":/sound.png"));  // 设置为音量图标
+    }
+}
+
+// 添加辅助函数更新歌词组件高度
+void MainWindow::updateLyricHeight() {
+    int availableHeight = this->contentsRect().height();
+    int controlHeight = 200; // 控制区固定高度
+
+    // 计算歌词区域高度（窗口高度 - 控制区高度 - 工具栏高度 - 其他组件高度）
+    // 这里简化为窗口高度减去控制区高度
+    int lyricHeight = availableHeight - controlHeight;
+
+    // 添加安全限制，避免高度过小或过大
+    lyricHeight = qMax(lyricHeight, 300); // 最小高度
+    lyricHeight = qMin(lyricHeight, 1500); // 最大高度
+
+    m_lyricWidget->setFixedHeight(lyricHeight);
+}
+
+
+// ------------------------------
+// 八、事件处理函数
+// ------------------------------
+
+// 窗口大小改变事件
 void MainWindow::resizeEvent(QResizeEvent *event) {
-    QMainWindow::resizeEvent(event); // 缺少这行关键代码
+    QMainWindow::resizeEvent(event);
+    updateLyricHeight();
 }

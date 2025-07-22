@@ -1,0 +1,35 @@
+<RCC>
+    <qresource prefix="/">
+        <file>chuangkouzuidahua.png</file>
+        <file>danjiweixuanzhong.png</file>
+        <file>danjixuanzhong.png</file>
+        <file>geciweidianji.png</file>
+        <file>geciyidianji.png</file>
+        <file>gengduo.png</file>
+        <file>guanbi.png</file>
+        <file>hengxian.png</file>
+        <file>jingyin.png</file>
+        <file>next.png</file>
+        <file>pause.png</file>
+        <file>pinglun.png</file>
+        <file>playlist.png</file>
+        <file>previous.png</file>
+        <file>res.qrc</file>
+        <file>shixin.png</file>
+        <file>shunxubofang.png</file>
+        <file>single.png</file>
+        <file>sound.png</file>
+        <file>suijibofang.png</file>
+        <file>theme.png</file>
+        <file>wenjianjia.png</file>
+        <file>xiazai.png</file>
+        <file>xin.png</file>
+        <file>yuandian.png</file>
+        <file>zuidahua.png</file>
+        <file>zuixiaohua.png</file>
+        <file>bofang.png</file>
+        <file>bcakground.jpg</file>
+        <file>add_to.png</file>
+        <file>bk6.jpg</file>
+    </qresource>
+</RCC>
