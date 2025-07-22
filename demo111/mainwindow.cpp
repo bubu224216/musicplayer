@@ -107,7 +107,7 @@ MainWindow::MainWindow(QWidget *parent) :
 //    topLayout->addStretch();           // 右侧空白或封面等
 
     mainLayout->addWidget(topWidget); // 添加上半部分（列表）
-    mainLayout->addStretch();
+
     mainLayout->addWidget(playerWidget);   // 播放区统一置底
 
 
@@ -801,12 +801,5 @@ void MainWindow::onVolumeSliderValueChanged(int value) {
 // 窗口大小改变事件
 void MainWindow::resizeEvent(QResizeEvent *event) {
     QMainWindow::resizeEvent(event);
-    // 获取窗口内容区域高度
-       int totalHeight = this->contentsRect().height();
 
-       // 设置歌词组件高度为 窗口高度 - 200
-       m_lyricWidget->setFixedHeight(totalHeight - 200);
-
-       // 如果使用布局管理器，还需强制更新布局
-       this->layout()->update();
 }
