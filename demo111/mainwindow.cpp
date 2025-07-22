@@ -22,6 +22,7 @@
 #include <time.h>
 #include <vector>
 #include <algorithm>
+#include<QMediaMetaData>
 
 
 // 构造函数：按"基础初始化→组件创建→布局组装→信号连接"分步实现
@@ -123,30 +124,8 @@ MainWindow::MainWindow(QWidget *parent) :
     m_lyricLayout->setSpacing(1);
 
 
-
-    // 歌曲封面
-    QWidget *cover = new QWidget;
-    cover->setFixedSize(300, 300);  // 设置固定大小，根据需要调整
-
-    // 创建布局
-    QVBoxLayout *coverLayout = new QVBoxLayout(cover);
-    coverLayout->setContentsMargins(0, 0, 0, 0);  // 移除边距
-    coverLayout->addStretch();
-
-    // 使用 QPalette 设置背景图片
-    QPixmap background(":/bk6.jpg");  // 替换为你的图片路径
-    QPalette palette;
-    palette.setBrush(cover->backgroundRole(), QBrush(background.scaled(
-        cover->size(),                // 缩放尺寸
-        Qt::KeepAspectRatioByExpanding,  // 保持比例并填充
-        Qt::SmoothTransformation       // 平滑缩放
-    )));
-    cover->setPalette(palette);
-    cover->setAutoFillBackground(true);  // 启用自动填充背景
-    m_lyricLayout->addWidget(cover);
-
-
-
+    connect(m_player, &QMediaPlayer::mediaStatusChanged,
+            this, &MainWindow::onMediaStatusChanged);
 
 
     topLayout->addWidget(m_lyricWidget);  // 添加到右侧布局
@@ -201,9 +180,9 @@ MainWindow::MainWindow(QWidget *parent) :
     controlPanel->setFixedHeight(200);
     controlPanel->setStyleSheet(R"(
         QWidget {
-            background-color: rgba(255, 255, 255, 200);
+            background-color: rgba(255, 255, 255, 0);
             border-radius: 15px;
-            border: 1px solid #ccc;
+            border: none;
         }
     )");
     QVBoxLayout *controlLayout = new QVBoxLayout(controlPanel);
@@ -222,6 +201,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // 第七步：初始化与信号连接
     initButtons();  // 按钮样式与信号
+    initCoverDisplay();
     srand(time(NULL));  // 随机数种子（用于随机播放）
 
 
@@ -795,6 +775,136 @@ void MainWindow::onVolumeSliderValueChanged(int value) {
     } else {
         ui->soundBtn->setIcon(QIcon(":/sound.png"));  // 设置为音量图标
     }
+}
+
+
+// 初始化封面显示组件
+void MainWindow::initCoverDisplay() {
+    // 创建封面标签
+    m_coverLabel = new QLabel(this);
+    m_coverLabel->setFixedSize(1000,1000);  // 设置封面大小
+    m_coverLabel->setStyleSheet("border: 2px solid rgba(255, 255, 255, 0.3); "
+                               "border-radius: 8px; "
+                               "background-color: rgba(0, 0, 0, 0.2);");
+    m_coverLabel->setAlignment(Qt::AlignCenter);
+
+    // 加载默认封面（没有找到封面时显示）
+    m_defaultCover = QPixmap(":/bk6.jpg");
+    if (m_defaultCover.isNull()) {
+        // 如果默认封面加载失败，创建一个简单的占位图
+        m_defaultCover = QPixmap(300, 300);
+        m_defaultCover.fill(QColor(50, 50, 50));
+    }
+
+    // 设置初始显示默认封面
+    setCoverImage(m_defaultCover);
+
+    // 将封面标签添加到歌词布局（替换原来的静态封面）
+    // 找到之前添加封面的位置，替换为：
+    m_lyricLayout->addWidget(m_coverLabel);
+}
+
+// 媒体状态变化时处理
+void MainWindow::onMediaStatusChanged(QMediaPlayer::MediaStatus status) {
+    // 当媒体加载完成后，提取封面
+    if (status == QMediaPlayer::LoadedMedia) {
+        loadAlbumCover();
+    }
+}
+
+// 获取内嵌的专辑封面
+// 修改 getEmbeddedCover() 函数，移除对 CoverArt 的使用
+QPixmap MainWindow::getEmbeddedCover() {
+    // 检查元数据是否可用
+    if (!m_player->isMetaDataAvailable()) {
+        return QPixmap();
+    }
+
+    // 尝试获取封面图片（使用 Qt 明确支持的元数据键）
+    QVariant coverData = m_player->metaData(QMediaMetaData::CoverArtImage);
+    if (coverData.isValid() && coverData.canConvert<QPixmap>()) {
+        return coverData.value<QPixmap>();
+    }
+
+    // 尝试获取缩略图作为备选
+    coverData = m_player->metaData(QMediaMetaData::ThumbnailImage);
+    if (coverData.isValid() && coverData.canConvert<QPixmap>()) {
+        return coverData.value<QPixmap>();
+    }
+
+    // 没有找到内嵌封面
+    return QPixmap();
+}
+
+// 在歌曲所在目录查找封面文件
+QPixmap MainWindow::findLocalCoverFile() {
+    if (!ui->musicList->currentItem()) {
+        return QPixmap();
+    }
+
+    // 获取当前歌曲文件路径
+    QString musicName = ui->musicList->currentItem()->text();
+    QString fullFileName = m_fullFileNameMap.value(musicName);
+    if (fullFileName.isEmpty()) {
+        return QPixmap();
+    }
+
+    QString musicFilePath = musicDir + fullFileName;
+    QFileInfo fileInfo(musicFilePath);
+    QString directory = fileInfo.dir().path();
+
+    // 常见的封面文件名列表
+    QStringList coverFileNames = {
+        "cover.jpg", "cover.png", "cover.jpeg",
+        "folder.jpg", "folder.png", "folder.jpeg",
+        "album.jpg", "album.png", "album.jpeg"
+    };
+
+    // 查找并加载封面文件
+    foreach (const QString &fileName, coverFileNames) {
+        QString coverPath = directory + "/" + fileName;
+        if (QFile::exists(coverPath)) {
+            QPixmap cover(coverPath);
+            if (!cover.isNull()) {
+                return cover;
+            }
+        }
+    }
+
+    // 没有找到本地封面文件
+    return QPixmap();
+}
+
+// 设置封面图片（保持比例缩放）
+void MainWindow::setCoverImage(const QPixmap &pixmap) {
+    if (m_coverLabel && !pixmap.isNull()) {
+        // 保持比例缩放图片以适应标签大小
+        QPixmap scaledPixmap = pixmap.scaled(
+            m_coverLabel->size(),
+            Qt::KeepAspectRatio,
+            Qt::SmoothTransformation
+        );
+        m_coverLabel->setPixmap(scaledPixmap);
+    }
+}
+
+// 加载专辑封面的主函数
+void MainWindow::loadAlbumCover() {
+    // 1. 先尝试从音频文件内嵌元数据中获取封面
+    QPixmap cover = getEmbeddedCover();
+
+    // 2. 如果没有内嵌封面，尝试在歌曲所在目录查找
+    if (cover.isNull()) {
+        cover = findLocalCoverFile();
+    }
+
+    // 3. 如果都没有找到，使用默认封面
+    if (cover.isNull()) {
+        cover = m_defaultCover;
+    }
+
+    // 显示封面
+    setCoverImage(cover);
 }
 
 

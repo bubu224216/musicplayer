@@ -60,6 +60,12 @@ private:
     void loadLyricForCurrentSong();
     void updateLyricDisplay();
 
+    void initCoverDisplay();        // 初始化封面显示组件
+    QPixmap getEmbeddedCover();     // 获取内嵌封面
+    QPixmap findLocalCoverFile();   // 查找本地封面文件
+    void setCoverImage(const QPixmap &pixmap);  // 设置封面图片
+    void loadAlbumCover();          // 加载专辑封面
+
     // ===== 成员变量 =====
     QMediaPlayer* m_player;              // 音乐播放器
     PLAYMODE m_mode;                     // 当前播放模式
@@ -79,6 +85,7 @@ private:
     // 歌词显示相关
     QList<Lyric> m_lyrics;
     QWidget* m_lyricWidget;
+
     QVBoxLayout* m_lyricLayout;
     QList<QLabel*> m_lyricLabels;
     int m_currentLyricIndex;
@@ -88,6 +95,10 @@ private:
     QWidget* m_volumePopup = nullptr;
     QSlider* m_volumeSlider = nullptr;
     QTimer* m_hideVolumeTimer = nullptr;
+
+
+    QLabel *m_coverLabel;       // 封面显示标签
+    QPixmap m_defaultCover;     // 默认封面图片
 
 private slots:
     // ===== 播放控制相关槽函数 =====
@@ -107,6 +118,8 @@ private slots:
     void handleProgressSliderPressed();         // 拖动开始
     void handleProgressSliderReleased();        // 拖动释放
     void onVolumeSliderValueChanged(int k);//切换静音
+
+    void onMediaStatusChanged(QMediaPlayer::MediaStatus status);  // 媒体状态变化槽函数
 
 
 };
