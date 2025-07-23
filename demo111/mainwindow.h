@@ -91,8 +91,13 @@ private:
     // 歌词显示相关
     QList<Lyric> m_lyrics;
     QWidget* m_lyricWidget;
+    QWidget* m_mainlyricWidget;
+    QWidget* m_coverWidget;
+
 
     QVBoxLayout* m_lyricLayout;
+    QVBoxLayout* m_mainlyricLayout;
+    QVBoxLayout* m_coverLayout;
     QList<QLabel*> m_lyricLabels;
     int m_currentLyricIndex;
     QString m_currentLyricFile;

@@ -122,19 +122,18 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
 
-    // 第五步：右侧播放控制区（垂直布局）
+    // 下方播放控制区（水平布局）
     QWidget *playerWidget = new QWidget(this);
     QHBoxLayout *playerLayout = new QHBoxLayout(playerWidget);
     playerLayout->setContentsMargins(10, 10, 10, 10);
     playerLayout->setSpacing(10);
 
-    //调整结构为上下结构
+    //上方音乐区
     QWidget *topWidget = new QWidget(this);
     QHBoxLayout *topLayout = new QHBoxLayout(topWidget);
     topLayout->setContentsMargins(0, 0, 0, 0);
     topLayout->setSpacing(0);
     topLayout->addWidget(listWidget);  // 左侧音乐列表
-//    topLayout->addStretch();           // 右侧空白或封面等
 
     mainLayout->addWidget(topWidget); // 添加上半部分（列表）
 
@@ -143,8 +142,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // 5.1 歌词显示部件
     m_lyricWidget = new QWidget(this);
-    m_lyricWidget->setMinimumHeight(300);
-    m_lyricWidget->setMinimumWidth(900);
 
     m_lyricWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     m_lyricWidget->setStyleSheet("background-color: rgba(0, 0, 0, 0); border-radius: 5px;");
@@ -152,12 +149,20 @@ MainWindow::MainWindow(QWidget *parent) :
     m_lyricLayout->setAlignment(Qt::AlignCenter);
     m_lyricLayout->setSpacing(1);
 
+    m_coverWidget = new QWidget(this);  // 显式创建实例
+    m_coverLayout = new QVBoxLayout(m_coverWidget);  // 为其设置唯一布局
+    m_coverLayout->setAlignment(Qt::AlignCenter);
+    m_mainlyricWidget = new QWidget(this);
+    m_mainlyricLayout = new QVBoxLayout(m_mainlyricWidget);
+    m_mainlyricLayout->setAlignment(Qt::AlignCenter);
+
 
     connect(m_player, &QMediaPlayer::mediaStatusChanged,
             this, &MainWindow::onMediaStatusChanged);
 
 
-    topLayout->addWidget(m_lyricWidget);  // 添加到右侧布局
+    topLayout->addWidget(m_mainlyricWidget);  // 添加到右侧布局
+    //让列表和歌曲按比例分配
     topLayout->setStretch(0, 1);  // 第0个控件（musicList）
     topLayout->setStretch(1, 2);  // 第1个控件（lyrics）
 
@@ -183,13 +188,8 @@ MainWindow::MainWindow(QWidget *parent) :
                                   "    border-radius: 4px;"
                                   "}");
     //随黑暗模式改变时间标签的颜色
-    m_currentTimeLabel->setStyleSheet("font-family: 微软雅黑; font-size: 12pt; font-weight: bold; color: #333;");
-    if(m_nightmode == false){
-        m_currentTimeLabel->setStyleSheet("color: white;");
-    }
-    else if(m_nightmode == true){
-        m_currentTimeLabel->setStyleSheet("color: black;");
-    }
+    m_currentTimeLabel->setStyleSheet("font-family: 微软雅黑; font-size: 12pt; font-weight: bold; color: #ffffff;");
+    m_totalTimeLabel->setStyleSheet("font-family: 微软雅黑; font-size: 12pt; font-weight: bold; color: #ffffff;");
     progressLayout->addWidget(m_currentTimeLabel);
     progressLayout->addWidget(m_progressSlider);
     progressLayout->addWidget(m_totalTimeLabel);
@@ -230,12 +230,11 @@ MainWindow::MainWindow(QWidget *parent) :
     controlLayout->addLayout(progressLayout);  // 进度条
     controlLayout->addWidget(buttonContainer);  // 按钮区
     // 添加到右侧布局（歌词区下方）
-//    playerLayout->addStretch();  // 歌词与控制区间的空白
     playerLayout->addWidget(controlPanel);
 
 
 
-    setBackGround(":/bk2.jpg");  // 设置背景
+    setBackGround(":/background_day.png");  // 设置背景
 
 
     // 第七步：初始化与信号连接
@@ -307,7 +306,8 @@ MainWindow::~MainWindow() {
 // 一、播放控制核心槽函数（最常用功能优先）
 // ------------------------------
 
-void MainWindow::handlePlaySlot() {
+// 播放/暂停切换
+void MainWindow::handlePlaySlot(){
     if (ui->musicList->count() == 0) return;
 
     // 未加载媒体时自动加载第一首
@@ -317,19 +317,29 @@ void MainWindow::handlePlaySlot() {
         return;
     }
 
-    bool isPlaying = (m_player->state() == QMediaPlayer::PlayingState);
-    if (isPlaying) {
-        m_player->pause();
-    } else {
-        m_player->play();
+    if(m_nightmode==true){
+        if (m_player->state() == QMediaPlayer::PlayingState) {
+                m_player->pause();
+                ui->playBtn->setIcon(QIcon(":/bofang.png"));
+          } else {
+                m_player->play();
+                loadAlbumCover();
+                ui->playBtn->setIcon(QIcon(":/pause.png"));
+            }
+      }
+    else  if(m_nightmode==false){
+        if (m_player->state() == QMediaPlayer::PlayingState) {
+                m_player->pause();
+                ui->playBtn->setIcon(QIcon(":/play_daytime.png"));
+          } else {
+                m_player->play();
+                loadAlbumCover();
+                ui->playBtn->setIcon(QIcon(":/pause_day.png"));
+            }
     }
 
-    // 根据夜间模式和播放状态设置图标
-    if (m_nightmode) {
-        ui->playBtn->setIcon(QIcon(isPlaying ? ":/bofang.png" : ":/pause.png"));
-    } else {
-        ui->playBtn->setIcon(QIcon(isPlaying ? ":/play_daytime.png" : ":/pause_day.png"));
-    }
+
+
 }
 
 // 下一首
@@ -354,6 +364,7 @@ void MainWindow::handleNextSlot(){
             break;
     }
     ui->musicList->setCurrentRow(nextRow);
+    loadAlbumCover();
     startPlayMusic();
     m_isManualSwitch = false;
 }
@@ -384,6 +395,7 @@ void MainWindow::handlePrevSlot(){
             break;
     }
     ui->musicList->setCurrentRow(preRow);
+    loadAlbumCover();
     startPlayMusic();
     m_isManualSwitch = false;
 }
@@ -413,7 +425,13 @@ void MainWindow::handleMusicListItemClicked(QListWidgetItem *item){
 
     m_player->setMedia(QUrl::fromLocalFile(musicDir + fullFileName));
     m_player->play();
-    ui->playBtn->setIcon(QIcon(":/pause.png"));
+    loadAlbumCover();
+    if(m_nightmode == true){
+        ui->playBtn->setIcon(QIcon(":/pause.png"));
+    }
+    else if(m_nightmode == false){
+        ui->playBtn->setIcon(QIcon(":/pause_day.png"));
+    }
     m_isManualSwitch = false;
 
     // 加载歌词
@@ -491,7 +509,7 @@ void MainWindow::handleSwitchModeSlot(){
     else if(m_nightmode == true){
         SwitchModeAction->setIcon(QIcon(":/night.png"));  // 改变为另一个图标资源
         SwitchModeAction->setText("夜间模式");
-        setBackGround(":/bk2.jpg");
+        setBackGround(":/background_day.png");
         deleteMusicAction->setIcon(QIcon(":/delete.png"));  // 改变为另一个图标资源
         addMusicAction->setIcon(QIcon(":/add_to.png"));  // 改变为另一个图标资源
         changeThemeAction->setIcon(QIcon(":/theme.png"));  // 改变为另一个图标资源
@@ -770,7 +788,13 @@ void MainWindow::startPlayMusic(){
     QString Abs = musicDir + fullFileName;
     m_player->setMedia(QUrl::fromLocalFile(Abs));
     m_player->play();
-    ui->playBtn->setIcon(QIcon(":/pause.png"));
+    loadAlbumCover();
+    if(m_nightmode == true){
+        ui->playBtn->setIcon(QIcon(":/pause.png"));
+    }
+    else if(m_nightmode == false){
+        ui->playBtn->setIcon(QIcon(":/pause_day.png"));
+    }
 
     // 重置进度与歌词
     m_progressSlider->setValue(0);
@@ -809,7 +833,7 @@ bool MainWindow::parseLyricFile(const QString& filePath){
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) return false;
 
     QTextStream in(&file);
-    in.setCodec("UTF-8");
+    in.setCodec("GBK");
     QRegExp regExp("\\[(\\d+):(\\d+).(\\d+)\\](.*)");  // 匹配[分:秒.毫秒]歌词
 
     while (!in.atEnd()) {
@@ -858,22 +882,14 @@ void MainWindow::loadLyricForCurrentSong() {
     QString lyricFilePath = musicFilePath.left(musicFilePath.lastIndexOf('.')) + ".lrc";
 
     // 无歌词文件时显示提示
-    if (!QFile::exists(lyricFilePath)) {
-        QLabel* noLyricLabel = new QLabel("未找到歌词文件", m_lyricWidget);
-        noLyricLabel->setStyleSheet("color: #CCCCCC; font-size: 14px;");
-        noLyricLabel->setAlignment(Qt::AlignCenter);
-        m_lyricLabels.append(noLyricLabel);
-        m_lyricLayout->addWidget(noLyricLabel);
-        noLyricLabel->hide(); // 初始隐藏
-        m_currentLyricFile = "";
-        return;
-    }
+//    if (!QFile::exists(lyricFilePath))
+
 
     // 解析并显示歌词
     m_currentLyricFile = lyricFilePath;
     if (parseLyricFile(lyricFilePath)) {
         for (const Lyric& lyric : m_lyrics) {
-            QLabel* label = new QLabel(lyric.content, m_lyricWidget);
+            QLabel* label = new QLabel(lyric.content, m_mainlyricWidget);
             label->setFont(baseFont);
             // 设置透明背景（关键修改）
             label->setStyleSheet("color: #CCCCCC; background-color: transparent; border: none;");
@@ -883,16 +899,6 @@ void MainWindow::loadLyricForCurrentSong() {
             label->hide(); // 初始隐藏
         }
         updateLyricDisplay();  // 初始显示
-    } else {
-        QLabel* errorLabel = new QLabel("歌词文件解析失败", m_lyricWidget);
-        // 错误提示Label也设置透明
-        errorLabel->setStyleSheet("color: #CCCCCC; font-size: 14px;"
-                                 "background-color: transparent;"
-                                 "border: none;");
-        errorLabel->setAlignment(Qt::AlignCenter);
-        m_lyricLabels.append(errorLabel);
-        m_lyricLayout->addWidget(errorLabel);
-        errorLabel->hide(); // 初始隐藏
     }
 }
 
@@ -945,10 +951,19 @@ void MainWindow::updateLyricDisplay(){
 void MainWindow::onVolumeSliderValueChanged(int value) {
     m_player->setVolume(value);  // 设置播放器音量
     // 检查音量是否为0
-    if (value == 0) {
-        ui->soundBtn->setIcon(QIcon(":/jingyin.png"));  // 设置为静音图标
-    } else {
-        ui->soundBtn->setIcon(QIcon(":/sound.png"));  // 设置为音量图标
+    if(m_nightmode == true){
+        if (value == 0) {
+            ui->soundBtn->setIcon(QIcon(":/jingyin.png"));  // 设置为静音图标
+        } else {
+            ui->soundBtn->setIcon(QIcon(":/sound.png"));  // 设置为音量图标
+        }
+     }
+    else{
+        if (value == 0) {
+            ui->soundBtn->setIcon(QIcon(":/silence_day.png"));  // 设置为静音图标
+        } else {
+            ui->soundBtn->setIcon(QIcon(":/sound_day.png"));  // 设置为音量图标
+        }
     }
 }
 
@@ -977,7 +992,9 @@ void MainWindow::initCoverDisplay() {
 
     // 将封面标签添加到歌词布局（替换原来的静态封面）
     // 找到之前添加封面的位置，替换为：
-    m_lyricLayout->addWidget(m_coverLabel);
+    m_coverLayout->addWidget(m_coverLabel);
+    m_mainlyricLayout->addWidget(m_coverWidget);
+    m_mainlyricLayout->addWidget(m_lyricWidget);
 }
 
 // 媒体状态变化时处理
@@ -1012,55 +1029,58 @@ QPixmap MainWindow::getEmbeddedCover() {
     return QPixmap();
 }
 
-// 在歌曲所在目录查找封面文件
 QPixmap MainWindow::findLocalCoverFile() {
-    if (!ui->musicList->currentItem()) {
-        return QPixmap();
-    }
+    // 检查是否有选中的音乐项
+    if (!ui->musicList->currentItem()) return QPixmap();
 
-    // 获取当前歌曲文件路径
+    // 获取当前歌曲信息
     QString musicName = ui->musicList->currentItem()->text();
+    qDebug()<<musicName;
     QString fullFileName = m_fullFileNameMap.value(musicName);
-    if (fullFileName.isEmpty()) {
-        return QPixmap();
-    }
+    if (fullFileName.isEmpty()) return QPixmap();
 
+    // 拼接完整音乐文件路径
     QString musicFilePath = musicDir + fullFileName;
     QFileInfo fileInfo(musicFilePath);
-    QString directory = fileInfo.dir().path();
 
-    // 常见的封面文件名列表
-    QStringList coverFileNames = {
-        "cover.jpg", "cover.png", "cover.jpeg",
-        "folder.jpg", "folder.png", "folder.jpeg",
-        "album.jpg", "album.png", "album.jpeg"
-    };
+    // 提取关键信息：歌曲所在目录 + 歌曲名（不含扩展名）
+    QString dirPath = fileInfo.absolutePath(); // 例如：D:/Music/
+    QString songBaseName = fileInfo.baseName(); // 例如：周杰伦-还在流浪（不含.mp3）
 
-    // 查找并加载封面文件
-    foreach (const QString &fileName, coverFileNames) {
-        QString coverPath = directory + "/" + fileName;
-        if (QFile::exists(coverPath)) {
-            QPixmap cover(coverPath);
-            if (!cover.isNull()) {
-                return cover;
-            }
+    // 拼接封面文件路径：目录 + 歌曲名_cov.jpg
+    QString coverPath = dirPath + "/" + songBaseName + "_cov.jpg";
+    qDebug()<<coverPath;
+    // 最终路径示例：D:/Music/周杰伦-还在流浪_cov.jpg
+
+    // 检查文件是否存在并加载
+    if (QFile::exists(coverPath)) {
+
+
+        QPixmap cover(coverPath);
+        if (!cover.isNull()) {
+            qDebug()<<"图片不是空";
+            return cover; // 找到并返回封面
         }
     }
 
-    // 没有找到本地封面文件
+    // 未找到返回空
     return QPixmap();
 }
 
 // 设置封面图片（保持比例缩放）
 void MainWindow::setCoverImage(const QPixmap &pixmap) {
-    if (m_coverLabel && !pixmap.isNull()) {
+     qDebug()<<"进来了函数！！！！";
+    if (!pixmap.isNull()) {
         // 保持比例缩放图片以适应标签大小
+        qDebug()<<"进来了if！！！！";
         QPixmap scaledPixmap = pixmap.scaled(
             m_coverLabel->size(),
             Qt::KeepAspectRatio,
             Qt::SmoothTransformation
         );
         m_coverLabel->setPixmap(scaledPixmap);
+        m_coverLabel->setAlignment(Qt::AlignCenter);
+        qDebug()<<"实现了这一步(设置封面图片)";
     }
 }
 
@@ -1071,16 +1091,20 @@ void MainWindow::loadAlbumCover() {
 
     // 2. 如果没有内嵌封面，尝试在歌曲所在目录查找
     if (cover.isNull()) {
+        qDebug()<<"使用了本地值";
         cover = findLocalCoverFile();
+
     }
 
-    // 3. 如果都没有找到，使用默认封面
-    if (cover.isNull()) {
+    //3. 如果都没有找到，使用默认封面
+    else  {
+        qDebug()<<"使用了默认值";
         cover = m_defaultCover;
     }
 
     // 显示封面
     setCoverImage(cover);
+    qDebug()<<"在setCoverImage之后的代码";
 }
 
 void MainWindow::initSystemTray() {

@@ -120,6 +120,7 @@ release/qrc_res.o: ../demo111/QTMusicPlayer/res.qrc \
 		../demo111/QTMusicPlayer/danjixuanzhong.png \
 		../demo111/QTMusicPlayer/24gl-repeatOnce2.png \
 		../demo111/QTMusicPlayer/theme.png \
+		../demo111/QTMusicPlayer/add_day.png \
 		../demo111/QTMusicPlayer/background_night.png \
 		../demo111/QTMusicPlayer/shunxubofang.png \
 		../demo111/QTMusicPlayer/zuidahua.png \
@@ -145,6 +146,7 @@ release/qrc_res.o: ../demo111/QTMusicPlayer/res.qrc \
 		../demo111/QTMusicPlayer/night.png \
 		../demo111/QTMusicPlayer/next_day.png \
 		../demo111/QTMusicPlayer/sound.png \
+		../demo111/QTMusicPlayer/background_day.png \
 		../demo111/QTMusicPlayer/wenjianjia.png \
 		../demo111/QTMusicPlayer/xiazai.png \
 		../demo111/QTMusicPlayer/pinglun.png \
