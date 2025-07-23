@@ -45,6 +45,8 @@ public:
     QToolButton *soundBtn;
     QPushButton *togglelistBtn;
     QWidget *widget_2;
+    QPushButton *nightBtn;
+    QPushButton *daytimeBtn;
     QMenuBar *menuBar;
 
     void setupUi(QMainWindow *MainWindow)
@@ -111,6 +113,12 @@ public:
         widget_2 = new QWidget(centralWidget);
         widget_2->setObjectName(QStringLiteral("widget_2"));
         widget_2->setGeometry(QRect(160, 20, 120, 80));
+        nightBtn = new QPushButton(centralWidget);
+        nightBtn->setObjectName(QStringLiteral("nightBtn"));
+        nightBtn->setGeometry(QRect(30, 180, 80, 15));
+        daytimeBtn = new QPushButton(centralWidget);
+        daytimeBtn->setObjectName(QStringLiteral("daytimeBtn"));
+        daytimeBtn->setGeometry(QRect(20, 160, 80, 15));
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QStringLiteral("menuBar"));
@@ -135,6 +143,8 @@ public:
         themeBtn->setText(QString());
         soundBtn->setText(QApplication::translate("MainWindow", "...", Q_NULLPTR));
         togglelistBtn->setText(QString());
+        nightBtn->setText(QString());
+        daytimeBtn->setText(QString());
     } // retranslateUi
 
 };

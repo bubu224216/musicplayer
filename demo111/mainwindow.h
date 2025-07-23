@@ -43,7 +43,7 @@ private:
     Ui::MainWindow *ui;
 
     // ===== UI与界面相关函数 =====
-    void setButtonStyle(QAbstractButton* button, const QString& filename);
+    void setBtnStyle(QAbstractButton* button, const QString& filename);
     void initButtons();                               // 初始化按钮与信号槽
     void resizeEvent(QResizeEvent *event);            // 重写窗口调整大小事件
     void setBackGround(const QString &filename);      // 设置背景图片
@@ -76,6 +76,11 @@ private:
     QMap<QString, QString> m_fullFileNameMap; // 歌曲名 => 文件名 映射
     bool m_isManualSwitch;              // 是否为手动切歌
     QWidget* m_listWidget;              // 歌曲列表父容器
+    bool m_nightmode;
+    QAction *SwitchModeAction;
+    QAction *deleteMusicAction;
+    QAction *addMusicAction;
+    QAction *changeThemeAction;
 
     // 进度条与时间
     QSlider* m_progressSlider;
@@ -120,6 +125,7 @@ private slots:
     void handleChangeBackgroundSlot();   // 更换背景图
     void handleToggleListSlot();         // 显示/隐藏播放列表
     void handleMusicListItemClicked(QListWidgetItem *item); // 列表点击播放
+    void handleSwitchModeSlot();
 
     // ===== 播放进度槽函数 =====
     void updateProgress(qint64 position);       // 播放进度更新

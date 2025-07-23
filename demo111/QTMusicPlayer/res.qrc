@@ -12,7 +12,6 @@
         <file>next.png</file>
         <file>pause.png</file>
         <file>pinglun.png</file>
-        <file>playlist.png</file>
         <file>previous.png</file>
         <file>res.qrc</file>
         <file>shixin.png</file>
@@ -28,10 +27,26 @@
         <file>zuidahua.png</file>
         <file>zuixiaohua.png</file>
         <file>bofang.png</file>
-        <file>bcakground.jpg</file>
         <file>add_to.png</file>
         <file>bk6.jpg</file>
         <file>bk2.jpg</file>
         <file>delete.png</file>
+        <file>background_night.png</file>
+        <file>night.png</file>
+        <file>daytime.png</file>
+        <file>theme_day.png</file>
+        <file>24gl-repeatOnce2.png</file>
+        <file>24gl-shuffle.png</file>
+        <file>delete_day.png</file>
+        <file>next_day.png</file>
+        <file>pause_day.png</file>
+        <file>play_daytime.png</file>
+        <file>playerlist_day.png</file>
+        <file>previous_day.png</file>
+        <file>shunxvbofang_day.png</file>
+        <file>silence_day.png</file>
+        <file>sound_day.png</file>
+        <file>playerlist.png</file>
+        <file>add_day.png</file>
     </qresource>
 </RCC>

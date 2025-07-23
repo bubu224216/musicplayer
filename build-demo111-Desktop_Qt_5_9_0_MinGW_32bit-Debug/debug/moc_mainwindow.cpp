@@ -21,8 +21,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_MainWindow_t {
-    QByteArrayData data[32];
-    char stringdata0[493];
+    QByteArrayData data[33];
+    char stringdata0[514];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -43,35 +43,36 @@ QT_MOC_LITERAL(8, 118, 20), // "handleToggleListSlot"
 QT_MOC_LITERAL(9, 139, 26), // "handleMusicListItemClicked"
 QT_MOC_LITERAL(10, 166, 16), // "QListWidgetItem*"
 QT_MOC_LITERAL(11, 183, 4), // "item"
-QT_MOC_LITERAL(12, 188, 14), // "updateProgress"
-QT_MOC_LITERAL(13, 203, 8), // "position"
-QT_MOC_LITERAL(14, 212, 14), // "updateDuration"
-QT_MOC_LITERAL(15, 227, 8), // "duration"
-QT_MOC_LITERAL(16, 236, 11), // "setPosition"
-QT_MOC_LITERAL(17, 248, 27), // "handleProgressSliderPressed"
-QT_MOC_LITERAL(18, 276, 28), // "handleProgressSliderReleased"
-QT_MOC_LITERAL(19, 305, 26), // "onVolumeSliderValueChanged"
-QT_MOC_LITERAL(20, 332, 1), // "k"
-QT_MOC_LITERAL(21, 334, 20), // "onMediaStatusChanged"
-QT_MOC_LITERAL(22, 355, 25), // "QMediaPlayer::MediaStatus"
-QT_MOC_LITERAL(23, 381, 6), // "status"
-QT_MOC_LITERAL(24, 388, 14), // "initSystemTray"
-QT_MOC_LITERAL(25, 403, 10), // "closeEvent"
-QT_MOC_LITERAL(26, 414, 12), // "QCloseEvent*"
-QT_MOC_LITERAL(27, 427, 5), // "event"
-QT_MOC_LITERAL(28, 433, 23), // "showDesktopNotification"
-QT_MOC_LITERAL(29, 457, 5), // "title"
-QT_MOC_LITERAL(30, 463, 7), // "message"
-QT_MOC_LITERAL(31, 471, 21) // "handleDeleteMusicSlot"
+QT_MOC_LITERAL(12, 188, 20), // "handleSwitchModeSlot"
+QT_MOC_LITERAL(13, 209, 14), // "updateProgress"
+QT_MOC_LITERAL(14, 224, 8), // "position"
+QT_MOC_LITERAL(15, 233, 14), // "updateDuration"
+QT_MOC_LITERAL(16, 248, 8), // "duration"
+QT_MOC_LITERAL(17, 257, 11), // "setPosition"
+QT_MOC_LITERAL(18, 269, 27), // "handleProgressSliderPressed"
+QT_MOC_LITERAL(19, 297, 28), // "handleProgressSliderReleased"
+QT_MOC_LITERAL(20, 326, 26), // "onVolumeSliderValueChanged"
+QT_MOC_LITERAL(21, 353, 1), // "k"
+QT_MOC_LITERAL(22, 355, 20), // "onMediaStatusChanged"
+QT_MOC_LITERAL(23, 376, 25), // "QMediaPlayer::MediaStatus"
+QT_MOC_LITERAL(24, 402, 6), // "status"
+QT_MOC_LITERAL(25, 409, 14), // "initSystemTray"
+QT_MOC_LITERAL(26, 424, 10), // "closeEvent"
+QT_MOC_LITERAL(27, 435, 12), // "QCloseEvent*"
+QT_MOC_LITERAL(28, 448, 5), // "event"
+QT_MOC_LITERAL(29, 454, 23), // "showDesktopNotification"
+QT_MOC_LITERAL(30, 478, 5), // "title"
+QT_MOC_LITERAL(31, 484, 7), // "message"
+QT_MOC_LITERAL(32, 492, 21) // "handleDeleteMusicSlot"
 
     },
     "MainWindow\0handlePlaySlot\0\0handleModeSlot\0"
     "handleNextSlot\0handlePrevSlot\0"
     "handleAddMusicSlot\0handleChangeBackgroundSlot\0"
     "handleToggleListSlot\0handleMusicListItemClicked\0"
-    "QListWidgetItem*\0item\0updateProgress\0"
-    "position\0updateDuration\0duration\0"
-    "setPosition\0handleProgressSliderPressed\0"
+    "QListWidgetItem*\0item\0handleSwitchModeSlot\0"
+    "updateProgress\0position\0updateDuration\0"
+    "duration\0setPosition\0handleProgressSliderPressed\0"
     "handleProgressSliderReleased\0"
     "onVolumeSliderValueChanged\0k\0"
     "onMediaStatusChanged\0QMediaPlayer::MediaStatus\0"
@@ -87,7 +88,7 @@ static const uint qt_meta_data_MainWindow[] = {
        7,       // revision
        0,       // classname
        0,    0, // classinfo
-      19,   14, // methods
+      20,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -95,25 +96,26 @@ static const uint qt_meta_data_MainWindow[] = {
        0,       // signalCount
 
  // slots: name, argc, parameters, tag, flags
-       1,    0,  109,    2, 0x08 /* Private */,
-       3,    0,  110,    2, 0x08 /* Private */,
-       4,    0,  111,    2, 0x08 /* Private */,
-       5,    0,  112,    2, 0x08 /* Private */,
-       6,    0,  113,    2, 0x08 /* Private */,
-       7,    0,  114,    2, 0x08 /* Private */,
-       8,    0,  115,    2, 0x08 /* Private */,
-       9,    1,  116,    2, 0x08 /* Private */,
-      12,    1,  119,    2, 0x08 /* Private */,
-      14,    1,  122,    2, 0x08 /* Private */,
-      16,    1,  125,    2, 0x08 /* Private */,
-      17,    0,  128,    2, 0x08 /* Private */,
-      18,    0,  129,    2, 0x08 /* Private */,
-      19,    1,  130,    2, 0x08 /* Private */,
-      21,    1,  133,    2, 0x08 /* Private */,
-      24,    0,  136,    2, 0x08 /* Private */,
-      25,    1,  137,    2, 0x08 /* Private */,
-      28,    2,  140,    2, 0x08 /* Private */,
-      31,    0,  145,    2, 0x08 /* Private */,
+       1,    0,  114,    2, 0x08 /* Private */,
+       3,    0,  115,    2, 0x08 /* Private */,
+       4,    0,  116,    2, 0x08 /* Private */,
+       5,    0,  117,    2, 0x08 /* Private */,
+       6,    0,  118,    2, 0x08 /* Private */,
+       7,    0,  119,    2, 0x08 /* Private */,
+       8,    0,  120,    2, 0x08 /* Private */,
+       9,    1,  121,    2, 0x08 /* Private */,
+      12,    0,  124,    2, 0x08 /* Private */,
+      13,    1,  125,    2, 0x08 /* Private */,
+      15,    1,  128,    2, 0x08 /* Private */,
+      17,    1,  131,    2, 0x08 /* Private */,
+      18,    0,  134,    2, 0x08 /* Private */,
+      19,    0,  135,    2, 0x08 /* Private */,
+      20,    1,  136,    2, 0x08 /* Private */,
+      22,    1,  139,    2, 0x08 /* Private */,
+      25,    0,  142,    2, 0x08 /* Private */,
+      26,    1,  143,    2, 0x08 /* Private */,
+      29,    2,  146,    2, 0x08 /* Private */,
+      32,    0,  151,    2, 0x08 /* Private */,
 
  // slots: parameters
     QMetaType::Void,
@@ -124,16 +126,17 @@ static const uint qt_meta_data_MainWindow[] = {
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void, 0x80000000 | 10,   11,
-    QMetaType::Void, QMetaType::LongLong,   13,
-    QMetaType::Void, QMetaType::LongLong,   15,
-    QMetaType::Void, QMetaType::Int,   13,
+    QMetaType::Void,
+    QMetaType::Void, QMetaType::LongLong,   14,
+    QMetaType::Void, QMetaType::LongLong,   16,
+    QMetaType::Void, QMetaType::Int,   14,
     QMetaType::Void,
     QMetaType::Void,
-    QMetaType::Void, QMetaType::Int,   20,
-    QMetaType::Void, 0x80000000 | 22,   23,
+    QMetaType::Void, QMetaType::Int,   21,
+    QMetaType::Void, 0x80000000 | 23,   24,
     QMetaType::Void,
-    QMetaType::Void, 0x80000000 | 26,   27,
-    QMetaType::Void, QMetaType::QString, QMetaType::QString,   29,   30,
+    QMetaType::Void, 0x80000000 | 27,   28,
+    QMetaType::Void, QMetaType::QString, QMetaType::QString,   30,   31,
     QMetaType::Void,
 
        0        // eod
@@ -153,23 +156,24 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         case 5: _t->handleChangeBackgroundSlot(); break;
         case 6: _t->handleToggleListSlot(); break;
         case 7: _t->handleMusicListItemClicked((*reinterpret_cast< QListWidgetItem*(*)>(_a[1]))); break;
-        case 8: _t->updateProgress((*reinterpret_cast< qint64(*)>(_a[1]))); break;
-        case 9: _t->updateDuration((*reinterpret_cast< qint64(*)>(_a[1]))); break;
-        case 10: _t->setPosition((*reinterpret_cast< int(*)>(_a[1]))); break;
-        case 11: _t->handleProgressSliderPressed(); break;
-        case 12: _t->handleProgressSliderReleased(); break;
-        case 13: _t->onVolumeSliderValueChanged((*reinterpret_cast< int(*)>(_a[1]))); break;
-        case 14: _t->onMediaStatusChanged((*reinterpret_cast< QMediaPlayer::MediaStatus(*)>(_a[1]))); break;
-        case 15: _t->initSystemTray(); break;
-        case 16: _t->closeEvent((*reinterpret_cast< QCloseEvent*(*)>(_a[1]))); break;
-        case 17: _t->showDesktopNotification((*reinterpret_cast< const QString(*)>(_a[1])),(*reinterpret_cast< const QString(*)>(_a[2]))); break;
-        case 18: _t->handleDeleteMusicSlot(); break;
+        case 8: _t->handleSwitchModeSlot(); break;
+        case 9: _t->updateProgress((*reinterpret_cast< qint64(*)>(_a[1]))); break;
+        case 10: _t->updateDuration((*reinterpret_cast< qint64(*)>(_a[1]))); break;
+        case 11: _t->setPosition((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 12: _t->handleProgressSliderPressed(); break;
+        case 13: _t->handleProgressSliderReleased(); break;
+        case 14: _t->onVolumeSliderValueChanged((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 15: _t->onMediaStatusChanged((*reinterpret_cast< QMediaPlayer::MediaStatus(*)>(_a[1]))); break;
+        case 16: _t->initSystemTray(); break;
+        case 17: _t->closeEvent((*reinterpret_cast< QCloseEvent*(*)>(_a[1]))); break;
+        case 18: _t->showDesktopNotification((*reinterpret_cast< const QString(*)>(_a[1])),(*reinterpret_cast< const QString(*)>(_a[2]))); break;
+        case 19: _t->handleDeleteMusicSlot(); break;
         default: ;
         }
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
         switch (_id) {
         default: *reinterpret_cast<int*>(_a[0]) = -1; break;
-        case 14:
+        case 15:
             switch (*reinterpret_cast<int*>(_a[1])) {
             default: *reinterpret_cast<int*>(_a[0]) = -1; break;
             case 0:
@@ -205,13 +209,13 @@ int MainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 19)
+        if (_id < 20)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 19;
+        _id -= 20;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 19)
+        if (_id < 20)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 19;
+        _id -= 20;
     }
     return _id;
 }

@@ -28,12 +28,14 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QStandardPaths>
+#include <QAction>
 
 
 // 构造函数：按"基础初始化→组件创建→布局组装→信号连接"分步实现
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     m_mode(LIST_MODE),
+    m_nightmode(true),
     ui(new Ui::MainWindow),
     m_shuffleIndex(-1),
     m_isManualSwitch(false),
@@ -42,7 +44,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     // 第一步：基础初始化（窗口属性、核心组件）
     ui->setupUi(this);
-    resize(1680, 1000);
+    resize(1344, 800);
     setWindowTitle("音乐播放器");
     m_player = new QMediaPlayer(this);  // 播放器核心组件
 
@@ -65,13 +67,16 @@ MainWindow::MainWindow(QWidget *parent) :
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     toolBar->addWidget(spacer);
     // 工具栏按钮
-    QAction *deleteMusicAction = new QAction(QIcon(":/delete.png"), "删除音乐", this);
-    QAction *addMusicAction = new QAction(QIcon(":/add_to.png"), "添加音乐", this);
-    QAction *changeThemeAction = new QAction(QIcon(":/theme.png"), "更换主题", this);
+    SwitchModeAction = new QAction(QIcon(":/night.png"), "夜间模式", this);
+    deleteMusicAction = new QAction(QIcon(":/delete.png"), "删除音乐", this);
+    addMusicAction = new QAction(QIcon(":/add_to.png"), "添加音乐", this);
+    changeThemeAction = new QAction(QIcon(":/theme.png"), "更换主题", this);
+    toolBar->addAction(SwitchModeAction);
     toolBar->addAction(deleteMusicAction);
     toolBar->addAction(addMusicAction);
     toolBar->addAction(changeThemeAction);
     // 工具栏信号连接（提前连接，避免分散）
+    connect(SwitchModeAction, &QAction::triggered, this, &MainWindow::handleSwitchModeSlot);
     connect(deleteMusicAction, &QAction::triggered, this, &MainWindow::handleDeleteMusicSlot);
     connect(addMusicAction, &QAction::triggered, this, &MainWindow::handleAddMusicSlot);
     connect(changeThemeAction, &QAction::triggered, this, &MainWindow::handleChangeBackgroundSlot);
@@ -177,6 +182,14 @@ MainWindow::MainWindow(QWidget *parent) :
                                   "    margin: -2px 0;"
                                   "    border-radius: 4px;"
                                   "}");
+    //随黑暗模式改变时间标签的颜色
+    m_currentTimeLabel->setStyleSheet("font-family: 微软雅黑; font-size: 12pt; font-weight: bold; color: #333;");
+    if(m_nightmode == false){
+        m_currentTimeLabel->setStyleSheet("color: white;");
+    }
+    else if(m_nightmode == true){
+        m_currentTimeLabel->setStyleSheet("color: black;");
+    }
     progressLayout->addWidget(m_currentTimeLabel);
     progressLayout->addWidget(m_progressSlider);
     progressLayout->addWidget(m_totalTimeLabel);
@@ -294,8 +307,7 @@ MainWindow::~MainWindow() {
 // 一、播放控制核心槽函数（最常用功能优先）
 // ------------------------------
 
-// 播放/暂停切换
-void MainWindow::handlePlaySlot(){
+void MainWindow::handlePlaySlot() {
     if (ui->musicList->count() == 0) return;
 
     // 未加载媒体时自动加载第一首
@@ -305,12 +317,18 @@ void MainWindow::handlePlaySlot(){
         return;
     }
 
-    if (m_player->state() == QMediaPlayer::PlayingState) {
+    bool isPlaying = (m_player->state() == QMediaPlayer::PlayingState);
+    if (isPlaying) {
         m_player->pause();
-        ui->playBtn->setIcon(QIcon(":/bofang.png"));
     } else {
         m_player->play();
-        ui->playBtn->setIcon(QIcon(":/pause.png"));
+    }
+
+    // 根据夜间模式和播放状态设置图标
+    if (m_nightmode) {
+        ui->playBtn->setIcon(QIcon(isPlaying ? ":/bofang.png" : ":/pause.png"));
+    } else {
+        ui->playBtn->setIcon(QIcon(isPlaying ? ":/play_daytime.png" : ":/pause_day.png"));
     }
 }
 
@@ -412,20 +430,86 @@ void MainWindow::handleModeSlot(){
     m_mode = static_cast<PLAYMODE>((m_mode + 1) % 3);
     if (m_mode == RANDOM_MODE) shufflePlayList();
 
-    switch(m_mode) {
-        case LIST_MODE:
-            ui->modeBtn->setIcon(QIcon(":/shunxubofang.png"));
-            qDebug() << "列表循环模式";
-            break;
-        case RANDOM_MODE:
-            ui->modeBtn->setIcon(QIcon(":/suijibofang.png"));
-            qDebug() << "随机播放模式";
-            break;
-        case SINGLE_MODE:
-            ui->modeBtn->setIcon(QIcon(":/single.png"));
-            qDebug() << "单曲循环模式";
-            break;
+    if(m_nightmode == true){
+        switch(m_mode) {
+            case LIST_MODE:
+                ui->modeBtn->setIcon(QIcon(":/shunxubofang.png"));
+                qDebug() << "列表循环模式";
+                break;
+            case RANDOM_MODE:
+                ui->modeBtn->setIcon(QIcon(":/suijibofang.png"));
+                qDebug() << "随机播放模式";
+                break;
+            case SINGLE_MODE:
+                ui->modeBtn->setIcon(QIcon(":/single.png"));
+                qDebug() << "单曲循环模式";
+                break;
+        }
     }
+    else if(m_nightmode == false){
+        switch(m_mode) {
+            case LIST_MODE:
+                ui->modeBtn->setIcon(QIcon(":/shunxvbofang_day.png"));
+                qDebug() << "列表循环模式";
+                break;
+            case RANDOM_MODE:
+                ui->modeBtn->setIcon(QIcon(":/24gl-shuffle.png"));
+                qDebug() << "随机播放模式";
+                break;
+            case SINGLE_MODE:
+                ui->modeBtn->setIcon(QIcon(":/24gl-repeatOnce2.png"));
+                qDebug() << "单曲循环模式";
+                break;
+        }
+    }
+}
+//黑暗模式切换
+void MainWindow::handleSwitchModeSlot(){
+    m_nightmode = !m_nightmode;
+    if(m_nightmode == false){
+        SwitchModeAction->setIcon(QIcon(":/daytime.png"));  // 改变为另一个图标资源
+        SwitchModeAction->setText("日间模式");
+        deleteMusicAction->setIcon(QIcon(":/delete_day.png"));  // 改变为另一个图标资源
+        addMusicAction->setIcon(QIcon(":/add_day.png"));  // 改变为另一个图标资源
+        changeThemeAction->setIcon(QIcon(":/theme_day.png"));  // 改变为另一个图标资源
+        setBackGround(":/background_night.png");
+        setBtnStyle(ui->preBtn, ":/previous_day.png");
+        setBtnStyle(ui->nextBtn, ":/next_day.png");
+        setBtnStyle(ui->modeBtn, ":/shunxvbofang_day.png");
+        setBtnStyle(ui->soundBtn, ":/sound_day.png");
+        setBtnStyle(ui->togglelistBtn, ":/playerlist_day.png");
+        //判断是否在播放
+        if(m_player->state() == QMediaPlayer::PlayingState){
+            setBtnStyle(ui->playBtn,":pause_day.png");
+        }else{
+            setBtnStyle(ui->playBtn,":/play_daytime.png");
+        }
+
+
+
+    }
+    else if(m_nightmode == true){
+        SwitchModeAction->setIcon(QIcon(":/night.png"));  // 改变为另一个图标资源
+        SwitchModeAction->setText("夜间模式");
+        setBackGround(":/bk2.jpg");
+        deleteMusicAction->setIcon(QIcon(":/delete.png"));  // 改变为另一个图标资源
+        addMusicAction->setIcon(QIcon(":/add_to.png"));  // 改变为另一个图标资源
+        changeThemeAction->setIcon(QIcon(":/theme.png"));  // 改变为另一个图标资源
+        setBtnStyle(ui->preBtn, ":/previous.png");
+        setBtnStyle(ui->nextBtn, ":/next.png");
+        setBtnStyle(ui->modeBtn, ":/shunxubofang.png");
+        setBtnStyle(ui->soundBtn, ":/sound.png");
+        setBtnStyle(ui->togglelistBtn, ":/playerlist.png");
+        //判断是否在播放
+        if(m_player->state() == QMediaPlayer::PlayingState){
+            setBtnStyle(ui->playBtn,":pause.png");
+        }else{
+            setBtnStyle(ui->playBtn,":/bofang.png");
+        }
+
+    }
+
+
 }
 
 // 切换左侧列表显示/隐藏
@@ -595,29 +679,30 @@ void MainWindow::updateDuration(qint64 duration){
 // ------------------------------
 
 // 初始化按钮样式与信号
-void MainWindow::initButtons(){
+void MainWindow::setBtnStyle (QAbstractButton* btn, const QString& icon) {
     // 按钮样式设置（lambda复用）
-    auto setBtnStyle = [&](QAbstractButton* btn, const QString& icon) {
-        btn->setFixedSize(80, 80);
-        btn->setIconSize(QSize(80, 80));
-        btn->setIcon(QIcon(icon));
-        btn->setStyleSheet("QAbstractButton {"
-                          "    background-color: transparent;"
-                          "    border: none;"
-                          "    padding: 5px;"
-                          "}"
-                          "QPushButton:hover {"
-                          "    background-color: rgba(0, 153, 255, 0.2);"
-                          "    border-radius: 5px;"
-                          "}");
-    };
+    btn->setFixedSize(80, 80);
+    btn->setIconSize(QSize(80, 80));
+    btn->setIcon(QIcon(icon));
+    btn->setStyleSheet("QAbstractButton {"
+                      "    background-color: transparent;"
+                      "    border: none;"
+                      "    padding: 5px;"
+                      "}"
+                      "QAbstractButton:hover {"
+                      "    background-color: rgba(0, 153, 255, 0.2);"
+                      "    border-radius: 5px;"
+                      "}");
+};
+void MainWindow::initButtons(){
     // 逐个设置按钮
     setBtnStyle(ui->preBtn, ":/previous.png");
     setBtnStyle(ui->playBtn, ":/bofang.png");
     setBtnStyle(ui->nextBtn, ":/next.png");
     setBtnStyle(ui->modeBtn, ":/shunxubofang.png");
     setBtnStyle(ui->soundBtn, ":/sound.png");
-    setBtnStyle(ui->togglelistBtn, ":/playlist.png");
+    setBtnStyle(ui->togglelistBtn, ":/playerlist.png");
+
 
     // 按钮信号连接
     connect(ui->playBtn, &QPushButton::clicked, this, &MainWindow::handlePlaySlot);
